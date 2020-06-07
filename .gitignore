@@ -8,7 +8,10 @@
 .buildlog/
 .history
 .svn/
-sand/
+
+#learning sandbox
+#remove cache once service deployed
+#sand/
 
 # IntelliJ related
 *.iml
