@@ -12,6 +12,7 @@
 #learning sandbox
 #remove cache once service deployed
 #sand/
+data/
 
 # IntelliJ related
 *.iml

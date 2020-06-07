@@ -13,11 +13,19 @@ class ContactDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login Form',
-      home: Scaffold(
-        
-      ),
+      title: 'Contact List Demo',
+      debugShowCheckedModeBanner: false,
+      home: ContactListPage(),
     );
   }
+  final MaterialPageRoute _noWay = MaterialPageRoute(
+    builder: (_) => Scaffold(
+    body: Center(
+      child: Text('No Route'),
+    )
+    )
+  );
 }
+
+
 

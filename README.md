@@ -10,6 +10,13 @@
 + 지출내역 테그로 효과적인 분석 가능
 + 각 수입 항목별 데이터 시각화 (파이차트, 바차트, 라인차트)
 
+데이터베이스 실행방법
+----
+mongod
+```
+"C:\Program Files\MongoDB\Server\4.2\bin\mongod.exe" --dbpath "C:\Users\Junha Kim\Developer\VSCProjects\finance-point\data\db"
+```
+
 추가예정
 ----
 + 날짜 주기를 일별 루틴 지정 가능
