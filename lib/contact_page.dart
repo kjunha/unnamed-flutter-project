@@ -34,14 +34,19 @@ class _ContactPageState extends State<ContactPage> {
           itemBuilder: (context, index) {
             final contact = contactsBox.getAt(index) as Contact;
             return ListTile(
-              title: Text(contact.name),
-              subtitle: Text(contact.age.toString()),
-              trailing: IconButton(
-                icon: Icon(Icons.delete),
-                onPressed: () {
-                  contactsBox.deleteAt(index);
-                },
-              )
+              title: Text('저녁식사'),
+              subtitle: Text('한줄메모'),
+              leading: IconButton(
+                icon: Icon(Icons.airplay),
+                onPressed: () {},
+              ),
+              trailing: Text('10,000'),
+              // trailing: IconButton(
+              //   icon: Icon(Icons.delete),
+              //   onPressed: () {
+              //     contactsBox.deleteAt(index);
+              //   },
+              // )
             );
           },
         );
