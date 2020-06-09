@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+part 'contact.g.dart';
 
 @HiveType()
 class Contact {

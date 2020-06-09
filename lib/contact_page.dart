@@ -1,4 +1,8 @@
+import 'package:finance_point/new_contact.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'model/contact.dart';
 
 
 class ContactPage extends StatefulWidget {
@@ -16,18 +20,32 @@ class _ContactPageState extends State<ContactPage> {
         body: Column(
           children: <Widget>[
             Expanded(child: _buildListView()),
+            NewContractForm()
           ],
         ));
   }
 
-  ListView _buildListView() {
-    return ListView(
-      children: <Widget>[
-        ListTile(
-          title: Text('Name'),
-          subtitle: Text('Age'),
-        )
-      ],
+  Widget _buildListView() {
+    return WatchBoxBuilder(
+      box: Hive.box('contacts'),
+      builder: (context, contactsBox) {
+        return ListView.builder(
+          itemCount: contactsBox.length,
+          itemBuilder: (context, index) {
+            final contact = contactsBox.getAt(index) as Contact;
+            return ListTile(
+              title: Text(contact.name),
+              subtitle: Text(contact.age.toString()),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  contactsBox.deleteAt(index);
+                },
+              )
+            );
+          },
+        );
+      },
     );
   }
 }

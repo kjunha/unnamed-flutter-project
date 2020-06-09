@@ -1,3 +1,4 @@
+import 'package:finance_point/model/contact.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -7,8 +8,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
+  Hive.registerAdapter(ContactAdapter());
   runApp(MyApp());
-  print("main invoked");
 }
 
 class MyApp extends StatefulWidget{
