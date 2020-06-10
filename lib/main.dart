@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:intl/intl.dart';
 
 //main() => runApp(ExtraCreditApp());
 //Sandbox
@@ -129,6 +130,8 @@ class Sandbox extends StatefulWidget {
 }
 
 class _SandboxState extends State<Sandbox> {
+  var dateInput = DateTime.now();
+  final df = DateFormat('yyyy-MM-dd');
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -143,12 +146,27 @@ class _SandboxState extends State<Sandbox> {
                 child: Column(
                   // crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start, 
-                      children: [SizedBox(width: 18,) ,Text('Input Label', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),]),
-                    SizedBox(height: 5,),
-                    Divider(thickness: 2,),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.start, 
+                    //   children: [SizedBox(width: 18,) ,Text('Input Label', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),]),
+                    // SizedBox(height: 5,),
+                    // Divider(thickness: 2,),
+                    Row(children: [
+                      Flexible(child: TextFormField(
+                        readOnly: true,
+                        initialValue: df.format(dateInput),
+                        decoration: InputDecoration(
+                          labelText: '날짜',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                        ),
+                      )),
+                      SizedBox(width: 15,),
+                      RaisedButton(child: Text('button'), onPressed: () {showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));},)
+                    ],),
+                    SizedBox(height: 15,),
                     TextFormField(
+                      readOnly: true,
+                      initialValue: df.format(dateInput),
                       decoration: InputDecoration(
                         labelText: '날짜',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
@@ -156,6 +174,7 @@ class _SandboxState extends State<Sandbox> {
                     ),
                     SizedBox(height: 15,),
                     TextFormField(
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '금액',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
