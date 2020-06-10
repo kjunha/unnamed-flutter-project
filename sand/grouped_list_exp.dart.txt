@@ -1,0 +1,42 @@
+class _SandboxState extends State<Sandbox> {
+  @override
+  Widget build(BuildContext context) {
+    var _dummy = [
+      {"group": "A", "value":"v1"},
+      {"group": "A", "value":"v2"},
+      {"group": "C", "value":"v3"},
+      {"group": "A", "value":"v4"},
+      {"group": "C", "value":"v5"},
+      {"group": "B", "value":"v6"},
+      {"group": "B", "value":"v7"}
+    ];
+
+    Widget _buildListTile(BuildContext context, dynamic element) {
+      print('DEBUG: type of element: ' + element.runtimeType.toString());
+      return ListTile(
+        title: Text(element['value'] as String),
+        onTap: () {},
+      );
+    }
+    Widget _buildGroupSeparatorBuilder(dynamic groupByValue) {
+      return Text('$groupByValue');
+    }
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
+        body: Column(
+          children: <Widget>[
+            Flexible(child:GroupedListView(
+              elements: _dummy,
+              groupBy: (element) => element['group'],
+              groupSeparatorBuilder:_buildGroupSeparatorBuilder,
+              itemBuilder: _buildListTile,
+              order: GroupedListOrder.ASC,
+            ),)
+            
+          ],
+        ),
+      ),
+    );
+  }
+}

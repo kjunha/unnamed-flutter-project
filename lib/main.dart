@@ -131,43 +131,74 @@ class Sandbox extends StatefulWidget {
 class _SandboxState extends State<Sandbox> {
   @override
   Widget build(BuildContext context) {
-    var _dummy = [
-      {"group": "A", "value":"v1"},
-      {"group": "A", "value":"v2"},
-      {"group": "C", "value":"v3"},
-      {"group": "A", "value":"v4"},
-      {"group": "C", "value":"v5"},
-      {"group": "B", "value":"v6"},
-      {"group": "B", "value":"v7"}
-    ];
-
-    Widget _buildListTile(BuildContext context, dynamic element) {
-      print('DEBUG: type of element: ' + element.runtimeType.toString());
-      return ListTile(
-        title: Text(element['value'] as String),
-        onTap: () {},
-      );
-    }
-    Widget _buildGroupSeparatorBuilder(dynamic groupByValue) {
-      return Text('$groupByValue');
-    }
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
+        appBar: AppBar(title: Text('Add New Record'),backgroundColor: Colors.orange,),
         body: Column(
-          children: <Widget>[
-            Flexible(child:GroupedListView(
-              elements: _dummy,
-              groupBy: (element) => element['group'],
-              groupSeparatorBuilder:_buildGroupSeparatorBuilder,
-              itemBuilder: _buildListTile,
-              order: GroupedListOrder.ASC,
-            ),)
-            
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric( vertical: 0, horizontal: 30),
+              child: Form(
+                child: Column(
+                  // crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start, 
+                      children: [SizedBox(width: 18,) ,Text('Input Label', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),]),
+                    SizedBox(height: 5,),
+                    Divider(thickness: 2,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '날짜',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                      ),
+                    ),
+                    SizedBox(height: 15,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '금액',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                      ),
+                    ),
+                    SizedBox(height: 15,),
+                    
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '결제수단',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                      ),
+                    ),
+                    SizedBox(height: 15,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '상세내역',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                      ),
+                    ),
+                    SizedBox(height: 30,),
+                    
+                    ButtonTheme(
+                      minWidth: double.infinity,
+                      height: 50,
+                      child: RaisedButton(
+                        child: Text('기록 추가'),
+                        color: Colors.green,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        onPressed: () {},
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ),
+
           ],
         ),
       ),
     );
   }
 }
+
+
 
