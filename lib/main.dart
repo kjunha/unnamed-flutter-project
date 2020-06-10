@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
+import './add_record.dart';
 
-//main() => runApp(ExtraCreditApp());
+main() => runApp(ExtraCreditApp());
 //Sandbox
-main() => runApp(Sandbox());
+//main() => runApp(Sandbox());
 
 class ExtraCreditApp extends StatelessWidget {
   @override
@@ -56,7 +57,7 @@ class _OverviewState extends State<Overview> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {},
+            onPressed: () {Navigator.pushNamed(context, '/add');},
           ),
           IconButton(
             icon:Icon(Icons.question_answer),
@@ -67,6 +68,7 @@ class _OverviewState extends State<Overview> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          PointWalletListView(),
           Container(
             margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
             child: Table(
@@ -110,13 +112,40 @@ class _OverviewState extends State<Overview> {
   }
 }
 
-class AddRecord extends StatelessWidget {
+//(REMAIN)Togglable Features in overview page
+class PointWalletListView extends StatefulWidget {
+  @override
+  _PointWalletListViewState createState() => _PointWalletListViewState();
+}
+
+class _PointWalletListViewState extends State<PointWalletListView> {
+  var _dummy = ['p1', 'p2', 'p3'];
+
+  Widget _buildPointWallet(BuildContext context, int i) {
+    return Container(
+      width: double.infinity,
+      color: Colors.blue,
+      child: Column(
+        children: <Widget>[
+          ListTile(title: Text('네이버 페이 포인트'), subtitle: Text('메모할 내용'),),
+          SizedBox(height: 5,),
+          Center(child: Text('1,234,567 P'),),
+          SizedBox(height: 55,),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return ListView.builder(
+      itemCount: _dummy.length,  
+      itemBuilder: _buildPointWallet
+    );
   }
 }
 
+//(WILLBEGONE)To Be Created
 class AboutApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -124,96 +153,17 @@ class AboutApp extends StatelessWidget {
   }
 }
 
+//(DEVONLY)Sandbox
 class Sandbox extends StatefulWidget {
   @override
   _SandboxState createState() => _SandboxState();
 }
 
 class _SandboxState extends State<Sandbox> {
-  var dateInput = DateTime.now();
-  final df = DateFormat('yyyy-MM-dd');
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Add New Record'),backgroundColor: Colors.orange,),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric( vertical: 0, horizontal: 30),
-              child: Form(
-                child: Column(
-                  // crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.start, 
-                    //   children: [SizedBox(width: 18,) ,Text('Input Label', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),]),
-                    // SizedBox(height: 5,),
-                    // Divider(thickness: 2,),
-                    Row(children: [
-                      Flexible(child: TextFormField(
-                        readOnly: true,
-                        initialValue: df.format(dateInput),
-                        decoration: InputDecoration(
-                          labelText: '날짜',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                        ),
-                      )),
-                      SizedBox(width: 15,),
-                      RaisedButton(child: Text('button'), onPressed: () {showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));},)
-                    ],),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      readOnly: true,
-                      initialValue: df.format(dateInput),
-                      decoration: InputDecoration(
-                        labelText: '날짜',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: '금액',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '결제수단',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '상세내역',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 30,),
-                    
-                    ButtonTheme(
-                      minWidth: double.infinity,
-                      height: 50,
-                      child: RaisedButton(
-                        child: Text('기록 추가'),
-                        color: Colors.green,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        onPressed: () {},
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ),
-
-          ],
-        ),
       ),
     );
   }
