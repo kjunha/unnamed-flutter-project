@@ -54,6 +54,10 @@ class _OverviewState extends State<Overview> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Overview'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {},
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -119,17 +123,25 @@ class PointWalletListView extends StatefulWidget {
 }
 
 class _PointWalletListViewState extends State<PointWalletListView> {
-  var _dummy = ['p1', 'p2', 'p3'];
+  var _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
 
   Widget _buildPointWallet(BuildContext context, int i) {
     return Container(
       width: double.infinity,
-      color: Colors.blue,
+      color: _dummy[i],
+      margin: EdgeInsets.symmetric(vertical: 3,horizontal:25),
       child: Column(
         children: <Widget>[
-          ListTile(title: Text('네이버 페이 포인트'), subtitle: Text('메모할 내용'),),
+          ListTile(
+            title: Text('네이버 페이 포인트', style: TextStyle(color: Colors.white),), 
+            subtitle: Text('메모할 내용', style: TextStyle(color: Colors.grey),), 
+            trailing: IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () {},
+            ),
+          ),
           SizedBox(height: 5,),
-          Center(child: Text('1,234,567 P'),),
+          Center(child: Text('1,234,567 P', style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
           SizedBox(height: 55,),
         ],
       ),
@@ -138,18 +150,36 @@ class _PointWalletListViewState extends State<PointWalletListView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return Flexible(child: ListView.builder(
       itemCount: _dummy.length,  
       itemBuilder: _buildPointWallet
-    );
+    ),);
   }
 }
 
-//(WILLBEGONE)To Be Created
+//(TOBEGONE)To Be Created
 class AboutApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold();
+  }
+}
+
+class RecordEditView extends StatefulWidget {
+  @override
+  _RecordEditViewState createState() => _RecordEditViewState();
+}
+
+class _RecordEditViewState extends State<RecordEditView> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'record_edit_view',
+      home: Scaffold(
+        appBar: AppBar(),
+        body: Text(''),
+      ),
+    );
   }
 }
 
@@ -164,6 +194,12 @@ class _SandboxState extends State<Sandbox> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
+        body: Column(
+          children: [
+            PointWalletListView(),
+          ],
+        ) 
       ),
     );
   }
