@@ -3,6 +3,10 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import './add_record.dart';
 
+//Sandbox Dependency
+import 'package:material_segmented_control/material_segmented_control.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+
 main() => runApp(ExtraCreditApp());
 //Sandbox
 //main() => runApp(Sandbox());
@@ -69,49 +73,54 @@ class _OverviewState extends State<Overview> {
           )
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PointWalletListView(),
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
-            child: Table(
-              children: [
-                TableRow(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                        Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                        Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                        Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                      ],
-                    ),
-                  ]
-                )
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PointWalletListView(),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
+              child: Table(
+                children: [
+                  TableRow(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                        ],
+                      ),
+                    ]
+                  )
+                ],
+              ),
             ),
-          ),
-          Divider(thickness: 2),
-          Flexible(child: ListView.builder(
-            itemCount: dummy.length,
-            itemBuilder: _buildRecordList,
-          ),)
-        ],
-      ),
+            Divider(thickness: 2),
+            Flexible(child: ListView.builder(
+              itemCount: dummy.length,
+              itemBuilder: _buildRecordList,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+            ),)
+          ],
+        ),
+      )
     );
   }
 }
@@ -152,7 +161,9 @@ class _PointWalletListViewState extends State<PointWalletListView> {
   Widget build(BuildContext context) {
     return Flexible(child: ListView.builder(
       itemCount: _dummy.length,  
-      itemBuilder: _buildPointWallet
+      itemBuilder: _buildPointWallet,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
     ),);
   }
 }
@@ -192,14 +203,72 @@ class Sandbox extends StatefulWidget {
 class _SandboxState extends State<Sandbox> {
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormBuilderState>();
+    var _currentSelection = -1;
+    var _date = DateTime.now();
+    Map<int, Widget> _children = {
+      -1:Text('지출 기록'),
+      1: Text('수입 기록')
+    };
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
-        body: Column(
+        body:Column(
           children: [
-            PointWalletListView(),
+            //Segmented Control
+            Container(
+              margin: EdgeInsets.symmetric( vertical: 20, horizontal: 20),
+              width: double.infinity,
+              child: MaterialSegmentedControl(
+                children: _children,
+                selectionIndex: _currentSelection,
+                selectedColor: Colors.blueAccent,
+                unselectedColor: Colors.white,
+                borderRadius: 5.0,
+                onSegmentChosen: (index) {
+                  setState(() {
+                    _currentSelection = index;
+                    print('chisen selection: ' + _currentSelection.toString());
+                  });
+                },
+              ),
+            ),
+            FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
+                  FormBuilderDateTimePicker(
+                    attribute: "date",
+                    inputType: InputType.date,
+                    format: DateFormat("yyyy-MM-dd"),
+                    decoration:
+                        InputDecoration(labelText: "Appointment Time"),
+                  ),
+                  FormBuilderTextField(
+                    attribute: "age",
+                    decoration: InputDecoration(labelText: "Age"),
+                    validators: [
+                      FormBuilderValidators.numeric(),
+                      FormBuilderValidators.max(70),
+                    ],
+                  ),
+                  FormBuilderDropdown(
+                    attribute: "gender",
+                    decoration: InputDecoration(labelText: "Gender"),
+                    // initialValue: 'Male',
+                    hint: Text('Select Gender'),
+                    validators: [FormBuilderValidators.required()],
+                    items: ['Male', 'Female', 'Other']
+                      .map((gender) => DropdownMenuItem(
+                        value: gender,
+                        child: Text("$gender")
+                    )).toList(),
+                  ),
+                ],
+              ),
+            )
           ],
-        ) 
+        )
       ),
     );
   }

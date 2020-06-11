@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_segmented_control/material_segmented_control.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+
 
 class AddRecord extends StatefulWidget {
   @override
@@ -7,72 +10,143 @@ class AddRecord extends StatefulWidget {
 }
 
 class _AddRecordState extends State<AddRecord> {
-  var dateInput = DateTime.now();
+  final _formKey = GlobalKey<FormBuilderState>();
   final df = DateFormat('yyyy-MM-dd');
+  final Map<int, Widget> _children = {
+    -1:Text('지출 기록'),
+    1:Text('수입 기록')
+  };
+
+  //Dummydata field - DEV
+  var _dummyMethods = ['np', 'pc', 'gm'];
+  var _dummyCategory = ['c1', 'c2', 'c3'];
+
+  //State variable
+  var _segctrSelection = -1;
+  var _dateInput = DateTime.now();
+  var _txDescription;
+  var _amount;
+
+  Widget selectRecordType() {
+    Widget txMethod = (
+      FormBuilderDropdown(
+        attribute: "transaction_method",
+        decoration: InputDecoration(
+          labelText: '거래수단',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+        ),
+        // initialValue: 'Male',
+        hint: Text('거래수단을 선택해주세요'),
+        validators: [FormBuilderValidators.required()],
+        items: _dummyMethods
+          .map((value) => DropdownMenuItem(
+            value: value,
+            child: Text("$value")
+        )).toList(),
+      )
+    );
+    if(_segctrSelection == -1) {
+      return Container(
+        child: Column(
+          children: [
+            txMethod,
+            SizedBox(height: 18,),
+            FormBuilderDropdown(
+              attribute: "transaction_tag",
+              decoration: InputDecoration(
+                labelText: '테그',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+              ),
+              // initialValue: 'Male',
+              hint: Text('포함하실 테그를 추가해 주세요'),
+              validators: [FormBuilderValidators.required()],
+              items: _dummyCategory
+                .map((value) => DropdownMenuItem(
+                  value: value,
+                  child: Text("$value")
+              )).toList(),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        child: Column(
+          children: [
+            txMethod
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-              appBar: AppBar(title: Text('Add New Record'),backgroundColor: Colors.blue,),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric( vertical: 0, horizontal: 30),
-              child: Form(
+        appBar: AppBar(title: Text('Add New Record'),backgroundColor: Colors.blue,),
+        body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
+          margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                child: MaterialSegmentedControl(
+                  children: _children,
+                  selectionIndex: _segctrSelection,
+                  selectedColor: Colors.blueAccent,
+                  unselectedColor: Colors.white,
+                  borderRadius: 5.0,
+                  onSegmentChosen: (index) {
+                    setState(() {
+                      _segctrSelection = index;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(height: 25,),
+              FormBuilder(
+                key: _formKey,
                 child: Column(
-                  // crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.start, 
-                    //   children: [SizedBox(width: 18,) ,Text('Input Label', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),]),
-                    // SizedBox(height: 5,),
-                    // Divider(thickness: 2,),
-                    Row(children: [
-                      Flexible(child: TextFormField(
-                        readOnly: true,
-                        initialValue: df.format(dateInput),
-                        decoration: InputDecoration(
-                          labelText: '날짜',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                        ),
-                      )),
-                      SizedBox(width: 15,),
-                      RaisedButton(child: Text('button'), onPressed: () {showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));},)
-                    ],),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      readOnly: true,
-                      initialValue: df.format(dateInput),
+                    FormBuilderDateTimePicker(
+                      attribute: "date",
+                      inputType: InputType.date,
+                      format: df,
                       decoration: InputDecoration(
                         labelText: '날짜',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
+                      onChanged: (value) {setState(() {
+                        _dateInput = value;
+                        print('date: ' + df.format(_dateInput));
+                      });},
                     ),
-                    SizedBox(height: 15,),
+                    SizedBox(height: 18,),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '거래내역',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                      ),
+                      onChanged: (value) {setState(() {
+                        _txDescription = value;
+                      });},
+                    ),
+                    SizedBox(height: 18,),
                     TextFormField(
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '금액',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
+                      //TODO Validate only positive value
+                      //TODO Validate only parsable
+                      onChanged: (value) {setState(() {
+                        _amount = double.parse(value);
+                      });},
                     ),
-                    SizedBox(height: 15,),
-                    
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '결제수단',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: '상세내역',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide())
-                      ),
-                    ),
-                    SizedBox(height: 30,),
-                    
+                    SizedBox(height: 18,),
+                    selectRecordType(),
+                    SizedBox(height: 25,),
                     ButtonTheme(
                       minWidth: double.infinity,
                       height: 50,
@@ -86,9 +160,9 @@ class _AddRecordState extends State<AddRecord> {
                   ],
                 ),
               )
-            ),
-          ],
-        ),
+            ],
+          ),
+      ),) 
     );
   }
 }
