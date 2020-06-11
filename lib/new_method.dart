@@ -9,6 +9,8 @@ class NewMethod extends StatefulWidget {
 }
 
 class _NewMethodState extends State<NewMethod> {
+  final _formKey = GlobalKey<FormBuilderState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +18,16 @@ class _NewMethodState extends State<NewMethod> {
       body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
           child: Column(
-            children: [Text('connection Test')],
+            children: [
+              FormBuilder(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    
+                  ],
+                ),
+              )
+            ],
         )
       )),
     );
