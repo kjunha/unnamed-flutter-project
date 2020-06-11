@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import './add_record.dart';
+import './new_method.dart';
 
 //Sandbox Dependency
 import 'package:material_segmented_control/material_segmented_control.dart';
@@ -20,7 +21,7 @@ class ExtraCreditApp extends StatelessWidget {
       routes: {
         '/add': (context) => AddRecord(),
         '/about': (context) => AboutApp(),
-        '/sand': (context) => Sandbox(), //Dev Dependancy
+        '/new': (context) => NewMethod(),
       },
     );
   }
@@ -140,6 +141,12 @@ class _PointWalletListViewState extends State<PointWalletListView> {
 
   List<Widget> _buildPointWallet() {
     List<Widget> _walletStack = [];
+    _walletStack.add(RaisedButton(
+      child: Text('새로운 거래수단 추가하기', style: TextStyle(color: Colors.white),),
+      color: Colors.blue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      onPressed: () {Navigator.pushNamed(context, '/new');},
+    ));
     for(Color color in _dummy) {
       _walletStack.add(
         Card(
@@ -170,7 +177,7 @@ class _PointWalletListViewState extends State<PointWalletListView> {
   Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
-        title: Text('포인트 지갑 목록'),
+        title: Text('거래수단 목록'),
         initiallyExpanded: true,
         children: _buildPointWallet(),
       ),

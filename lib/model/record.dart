@@ -1,11 +1,10 @@
 class Record {
   DateTime date;
-  double balance;
-  String note;
+  double amount;
+  String description;
   String method;
+  String tag;
 
-  Record(String _date, String _balance, this.note, this.method) {
-    this.date = DateTime.parse(_date);
-    this.balance = double.parse(_balance);
-  }
+  //TODO add optional param
+  Record(this.date, this.amount, this.description, this.method);
 }
