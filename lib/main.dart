@@ -39,39 +39,33 @@ class _OverviewState extends State<Overview> {
   Widget _buildRecordList(BuildContext context, int i) {
     var labelColor = Colors.blue;
     var trailingTextColor = Colors.green;
-    return ListTile(
-      title:Text('지출내역 상세기록', ),
-      subtitle: Text('지불수단'),
-      leading: Container(
-        child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
-        width: 48,
-        height: 22,
-        decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
+    return Card(
+      child: ListTile(
+        title:Text('지출내역 상세기록', ),
+        subtitle: Text('지불수단'),
+        leading: Container(
+          child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
+          width: 48,
+          height: 22,
+          decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
+        ),
+        trailing: Text('10,000', style: TextStyle(color: trailingTextColor, fontWeight: FontWeight.bold, fontSize: 18),) ,
+        onTap: () {},
       ),
-      trailing: Text('10,000', style: TextStyle(color: trailingTextColor, fontWeight: FontWeight.bold, fontSize: 18),) ,
-      onTap: () {},
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[300],
       appBar: AppBar(
         title: Text('Overview'),
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {},
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {Navigator.pushNamed(context, '/add');},
-          ),
-          IconButton(
-            icon:Icon(Icons.question_answer),
-            onPressed: () {},
-          )
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -79,39 +73,49 @@ class _OverviewState extends State<Overview> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             PointWalletListView(),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
-              child: Table(
-                children: [
-                  TableRow(
+            //수입 및 지출내역 block
+            Card(
+              child: Column(children: [
+                ListTile(  
+                  title: Center(child: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),)),
+                  dense: true,
+                  trailing: IconButton(icon: Icon(Icons.add), onPressed: () {Navigator.pushNamed(context, '/add');},),
+                ),
+                Divider(thickness: 2,),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
+                  child: Table(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                        ],
-                      ),
-                    ]
-                  )
-                ],
-              ),
+                      TableRow(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                            ],
+                          ),
+                        ]
+                      )
+                    ],
+                  ),
+                ),
+              ]),
             ),
-            Divider(thickness: 2),
             Flexible(child: ListView.builder(
               itemCount: dummy.length,
               itemBuilder: _buildRecordList,
@@ -134,37 +138,43 @@ class PointWalletListView extends StatefulWidget {
 class _PointWalletListViewState extends State<PointWalletListView> {
   var _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
 
-  Widget _buildPointWallet(BuildContext context, int i) {
-    return Container(
-      width: double.infinity,
-      color: _dummy[i],
-      margin: EdgeInsets.symmetric(vertical: 3,horizontal:25),
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text('네이버 페이 포인트', style: TextStyle(color: Colors.white),), 
-            subtitle: Text('메모할 내용', style: TextStyle(color: Colors.grey),), 
-            trailing: IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () {},
-            ),
+  List<Widget> _buildPointWallet() {
+    List<Widget> _walletStack = [];
+    for(Color color in _dummy) {
+      _walletStack.add(
+        Card(
+          color: color,
+          margin: EdgeInsets.symmetric(vertical: 3,horizontal:25),
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                title: Text('네이버 페이 포인트', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+                subtitle: Text('메모할 내용', style: TextStyle(color: Colors.grey[200]),), 
+                trailing: IconButton(
+                  icon: Icon(Icons.settings),
+                  onPressed: () {},
+                ),
+              ),
+              SizedBox(height: 5,),
+              Center(child: Text('1,234,567 P', style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
+              SizedBox(height: 55,),
+            ],
           ),
-          SizedBox(height: 5,),
-          Center(child: Text('1,234,567 P', style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
-          SizedBox(height: 55,),
-        ],
-      ),
-    );
+        )
+      );
+    }
+    return _walletStack;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(child: ListView.builder(
-      itemCount: _dummy.length,  
-      itemBuilder: _buildPointWallet,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-    ),);
+    return Card(
+      child: ExpansionTile(
+        title: Text('포인트 지갑 목록'),
+        initiallyExpanded: true,
+        children: _buildPointWallet(),
+      ),
+    );
   }
 }
 

@@ -13,8 +13,8 @@ class _AddRecordState extends State<AddRecord> {
   final _formKey = GlobalKey<FormBuilderState>();
   final df = DateFormat('yyyy-MM-dd');
   final Map<int, Widget> _children = {
-    -1:Text('지출 기록'),
-    1:Text('수입 기록')
+    -1:Text('지출 내역'),
+    1:Text('수입 내역')
   };
 
   //Dummydata field - DEV
@@ -83,7 +83,7 @@ class _AddRecordState extends State<AddRecord> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Add New Record'),backgroundColor: Colors.blue,),
+        appBar: AppBar(title: Text('수입 및 지출내역 추가'),backgroundColor: Colors.blue,),
         body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
           child: Column(
@@ -151,9 +151,12 @@ class _AddRecordState extends State<AddRecord> {
                       minWidth: double.infinity,
                       height: 50,
                       child: RaisedButton(
-                        child: Text('기록 추가'),
-                        color: Colors.green,
+                        child: Text('기록 추가', style: TextStyle(color: Colors.white, fontSize: 16),),
+                        color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        //TODO Alert when amount is 0
+                        //TODO Alert when txDescription == null
+                        //TODO Alert when method == null
                         onPressed: () {},
                       ),
                     )
