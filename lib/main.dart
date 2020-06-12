@@ -239,6 +239,7 @@ class _SandboxState extends State<Sandbox> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
+        drawer: loadDrawer(context),
         body:Column(
           children: [
             Text('hi')
