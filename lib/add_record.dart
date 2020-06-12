@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_chips_input/flutter_chips_input.dart';
 
 
 class AddRecord extends StatefulWidget {
@@ -116,10 +117,10 @@ class _AddRecordState extends State<AddRecord> {
                         labelText: '날짜',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
-                      onChanged: (value) {setState(() {
-                        _dateInput = value;
-                        print('date: ' + df.format(_dateInput));
-                      });},
+                      // onChanged: (value) {setState(() {
+                      //   _dateInput = value;
+                      //   print('date: ' + df.format(_dateInput));
+                      // });},
                     ),
                     SizedBox(height: 18,),
                     TextFormField(
