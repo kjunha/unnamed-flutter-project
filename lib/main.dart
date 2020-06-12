@@ -3,10 +3,9 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import './add_record.dart';
 import './new_method.dart';
+import './drawer_common.dart';
 
 //Sandbox Dependency
-import 'package:material_segmented_control/material_segmented_control.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 main() => runApp(ExtraCreditApp());
 //Sandbox
@@ -22,6 +21,7 @@ class ExtraCreditApp extends StatelessWidget {
         '/add': (context) => AddRecord(),
         '/about': (context) => AboutApp(),
         '/new': (context) => NewMethod(),
+        '/sand': (context) => Sandbox()
       },
     );
   }
@@ -63,11 +63,11 @@ class _OverviewState extends State<Overview> {
       appBar: AppBar(
         title: Text('Overview'),
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {},
-        ),
+        actions: [
+          IconButton(icon: Icon(Icons.build),onPressed: () {Navigator.pushNamed(context, '/sand');},)
+        ],
       ),
+      drawer: loadDrawer(context),
       body: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -220,70 +220,12 @@ class Sandbox extends StatefulWidget {
 class _SandboxState extends State<Sandbox> {
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormBuilderState>();
-    var _currentSelection = -1;
-    var _date = DateTime.now();
-    Map<int, Widget> _children = {
-      -1:Text('지출 기록'),
-      1: Text('수입 기록')
-    };
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
         body:Column(
           children: [
-            //Segmented Control
-            Container(
-              margin: EdgeInsets.symmetric( vertical: 20, horizontal: 20),
-              width: double.infinity,
-              child: MaterialSegmentedControl(
-                children: _children,
-                selectionIndex: _currentSelection,
-                selectedColor: Colors.blueAccent,
-                unselectedColor: Colors.white,
-                borderRadius: 5.0,
-                onSegmentChosen: (index) {
-                  setState(() {
-                    _currentSelection = index;
-                    print('chisen selection: ' + _currentSelection.toString());
-                  });
-                },
-              ),
-            ),
-            FormBuilder(
-              key: _formKey,
-              child: Column(
-                children: [
-                  FormBuilderDateTimePicker(
-                    attribute: "date",
-                    inputType: InputType.date,
-                    format: DateFormat("yyyy-MM-dd"),
-                    decoration:
-                        InputDecoration(labelText: "Appointment Time"),
-                  ),
-                  FormBuilderTextField(
-                    attribute: "age",
-                    decoration: InputDecoration(labelText: "Age"),
-                    validators: [
-                      FormBuilderValidators.numeric(),
-                      FormBuilderValidators.max(70),
-                    ],
-                  ),
-                  FormBuilderDropdown(
-                    attribute: "gender",
-                    decoration: InputDecoration(labelText: "Gender"),
-                    // initialValue: 'Male',
-                    hint: Text('Select Gender'),
-                    validators: [FormBuilderValidators.required()],
-                    items: ['Male', 'Female', 'Other']
-                      .map((gender) => DropdownMenuItem(
-                        value: gender,
-                        child: Text("$gender")
-                    )).toList(),
-                  ),
-                ],
-              ),
-            )
+            Text('hi')
           ],
         )
       ),

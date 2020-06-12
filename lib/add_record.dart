@@ -17,15 +17,15 @@ class _AddRecordState extends State<AddRecord> {
     1:Text('수입 내역')
   };
 
-  //Dummydata field - DEV
-  var _dummyMethods = ['np', 'pc', 'gm'];
-  var _dummyCategory = ['c1', 'c2', 'c3'];
-
   //State variable
   var _segctrSelection = -1;
   var _dateInput = DateTime.now();
   var _txDescription;
   var _amount;
+
+  //Dummydata field - DEV
+  var _dummyMethods = ['np', 'pc', 'gm'];
+  var _dummyCategory = ['c1', 'c2', 'c3'];
 
   Widget selectRecordType() {
     Widget txMethod = (
