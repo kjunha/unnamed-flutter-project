@@ -34,15 +34,28 @@ class Overview extends StatefulWidget {
 }
 
 class _OverviewState extends State<Overview> {
-  var dummy = [1,2,3,4,5];
+  var _dummy = [
+    {"date": "2020/06/05", "value":"v1"},
+    {"date": "2020/06/05", "value":"v2"},
+    {"date": "2020/06/05", "value":"v3"},
+    {"date": "2020/06/07", "value":"v4"},
+    {"date": "2020/06/07", "value":"v5"},
+    {"date": "2020/06/05", "value":"v6"},
+    {"date": "2020/06/05", "value":"v7"},
+    {"date": "2020/06/03", "value":"v8"},
+    {"date": "2020/05/30", "value":"v9"}
+  ];
+  Widget _buildGroupSeparator(dynamic groupByValue) {
+    return Text('$groupByValue');
+  }
 
   //List Tile UI
-  Widget _buildRecordList(BuildContext context, int i) {
+  Widget _buildRecordList(BuildContext context, dynamic element) {
     var labelColor = Colors.blue;
     var trailingTextColor = Colors.green;
     return Card(
       child: ListTile(
-        title:Text('지출내역 상세기록', ),
+        title:Text('지출내역 상세기록 ' + element['value'], ),
         subtitle: Text('지불수단'),
         leading: Container(
           child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
@@ -78,8 +91,9 @@ class _OverviewState extends State<Overview> {
             Card(
               child: Column(children: [
                 ListTile(  
-                  title: Center(child: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),)),
-                  dense: true,
+                  //title: Center(child: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),)),
+                  title: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),),
+                  dense: false,
                   trailing: IconButton(icon: Icon(Icons.add), onPressed: () {Navigator.pushNamed(context, '/add');},),
                 ),
                 Divider(thickness: 2,),
@@ -117,8 +131,10 @@ class _OverviewState extends State<Overview> {
                 ),
               ]),
             ),
-            Flexible(child: ListView.builder(
-              itemCount: dummy.length,
+            Flexible(child: GroupedListView(
+              elements: _dummy,
+              groupBy: (element) => element['date'],
+              groupSeparatorBuilder: _buildGroupSeparator,
               itemBuilder: _buildRecordList,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -177,7 +193,7 @@ class _PointWalletListViewState extends State<PointWalletListView> {
   Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
-        title: Text('거래수단 목록'),
+        title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
         initiallyExpanded: true,
         children: _buildPointWallet(),
       ),
