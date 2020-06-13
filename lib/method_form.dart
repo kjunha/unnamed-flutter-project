@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
 
-class NewMethod extends StatefulWidget {
+class MethodForm extends StatefulWidget {
   @override
-  _NewMethodState createState() => _NewMethodState();
+  _MethodFormState createState() => _MethodFormState();
 }
 
-class _NewMethodState extends State<NewMethod> {
+class _MethodFormState extends State<MethodForm> {
   final _formKey = GlobalKey<FormBuilderState>();
 
   //Dummydata field -DEV

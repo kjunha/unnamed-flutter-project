@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
-import './add_record.dart';
-import './new_method.dart';
+import './record_form.dart';
+import './method_form.dart';
 import './drawer_common.dart';
+import './record_list.dart';
+import './method_list.dart';
 
 //Sandbox Dependency
 
@@ -18,10 +20,12 @@ class ExtraCreditApp extends StatelessWidget {
       title: 'Extra Credit',
       home: Overview(),
       routes: {
-        '/add': (context) => AddRecord(),
-        '/about': (context) => AboutApp(),
-        '/new': (context) => NewMethod(),
-        '/sand': (context) => Sandbox()
+        '/add': (context) => RecordForm(),
+        //'/about': (context) => AboutApp(),
+        '/new': (context) => MethodForm(),
+        '/sand': (context) => Sandbox(),
+        '/edit': (context) => RecordList(),
+        '/manage': (context) => MethodList()
       },
     );
   }
@@ -196,32 +200,6 @@ class _PointWalletListViewState extends State<PointWalletListView> {
         title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
         initiallyExpanded: true,
         children: _buildPointWallet(),
-      ),
-    );
-  }
-}
-
-//(TOBEGONE)To Be Created
-class AboutApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
-}
-
-class RecordEditView extends StatefulWidget {
-  @override
-  _RecordEditViewState createState() => _RecordEditViewState();
-}
-
-class _RecordEditViewState extends State<RecordEditView> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'record_edit_view',
-      home: Scaffold(
-        appBar: AppBar(),
-        body: Text(''),
       ),
     );
   }

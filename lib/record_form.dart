@@ -5,12 +5,12 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
 
 
-class AddRecord extends StatefulWidget {
+class RecordForm extends StatefulWidget {
   @override
-  _AddRecordState createState() => _AddRecordState();
+  _RecordFormState createState() => _RecordFormState();
 }
 
-class _AddRecordState extends State<AddRecord> {
+class _RecordFormState extends State<RecordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
   final df = DateFormat('yyyy-MM-dd');
   final Map<int, Widget> _children = {

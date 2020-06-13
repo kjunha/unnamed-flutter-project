@@ -39,7 +39,7 @@ Drawer loadDrawer(BuildContext context) {
           title: Text('수입 및 지출내역 편집', style: TextStyle(fontSize: 18),),
           leading: Icon(Icons.account_circle),
           onTap: () {
-            //Navigator.pushNamed(context, '/edit');
+            Navigator.pushNamed(context, '/edit');
           },
         ),
         Divider(thickness: 3,height: 3,),
@@ -47,7 +47,7 @@ Drawer loadDrawer(BuildContext context) {
           title: Text('거래수단 관리', style: TextStyle(fontSize: 18),),
           leading: Icon(Icons.account_circle),
           onTap: () {
-            //Navigator.pushNamed(context, '/manage');
+            Navigator.pushNamed(context, '/manage');
           },
         ),
         Divider(thickness: 3,height: 3,),
