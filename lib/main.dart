@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:intl/intl.dart';
+import 'source_common.dart';
 import './record_form.dart';
 import './method_form.dart';
 import './drawer_common.dart';
@@ -39,15 +39,15 @@ class Overview extends StatefulWidget {
 
 class _OverviewState extends State<Overview> {
   var _dummy = [
-    {"date": "2020/06/05", "value":"v1"},
-    {"date": "2020/06/05", "value":"v2"},
-    {"date": "2020/06/05", "value":"v3"},
-    {"date": "2020/06/07", "value":"v4"},
-    {"date": "2020/06/07", "value":"v5"},
-    {"date": "2020/06/05", "value":"v6"},
-    {"date": "2020/06/05", "value":"v7"},
-    {"date": "2020/06/03", "value":"v8"},
-    {"date": "2020/05/30", "value":"v9"}
+    {"date": "2020/06/05", "value":"10000"},
+    {"date": "2020/06/05", "value":"10000"},
+    {"date": "2020/06/05", "value":"10000"},
+    {"date": "2020/06/07", "value":"10000"},
+    {"date": "2020/06/07", "value":"10000"},
+    {"date": "2020/06/05", "value":"10000"},
+    {"date": "2020/06/05", "value":"10000"},
+    {"date": "2020/06/03", "value":"10000"},
+    {"date": "2020/05/30", "value":"10000"}
   ];
   Widget _buildGroupSeparator(dynamic groupByValue) {
     return Text('$groupByValue');
@@ -56,10 +56,11 @@ class _OverviewState extends State<Overview> {
   //List Tile UI
   Widget _buildRecordList(BuildContext context, dynamic element) {
     var labelColor = Colors.blue;
-    var trailingTextColor = Colors.green;
+    var positiveTextColor = Colors.green;
+    var negativeTextColor = Colors.red;
     return Card(
       child: ListTile(
-        title:Text('지출내역 상세기록 ' + element['value'], ),
+        title:Text('지출내역 상세기록 ',),
         subtitle: Text('지불수단'),
         leading: Container(
           child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
@@ -67,7 +68,12 @@ class _OverviewState extends State<Overview> {
           height: 22,
           decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
         ),
-        trailing: Text('10,000', style: TextStyle(color: trailingTextColor, fontWeight: FontWeight.bold, fontSize: 18),) ,
+        trailing: Text(
+          buildCurrencyString(10000, false), 
+          style: TextStyle(
+            color: double.parse(element['value'])>0?positiveTextColor:negativeTextColor, 
+            fontWeight: FontWeight.bold, fontSize: 18
+          ),),
         onTap: () {},
       ),
     );
@@ -90,7 +96,7 @@ class _OverviewState extends State<Overview> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PointWalletListView(),
+            TxMethodWalletListView(),
             //수입 및 지출내역 block
             Card(
               child: Column(children: [
@@ -111,21 +117,21 @@ class _OverviewState extends State<Overview> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text('10,000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                         ]
@@ -150,16 +156,10 @@ class _OverviewState extends State<Overview> {
   }
 }
 
-//(REMAIN)Togglable Features in overview page
-class PointWalletListView extends StatefulWidget {
-  @override
-  _PointWalletListViewState createState() => _PointWalletListViewState();
-}
+class TxMethodWalletListView extends StatelessWidget {
+  final _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
 
-class _PointWalletListViewState extends State<PointWalletListView> {
-  var _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
-
-  List<Widget> _buildPointWallet() {
+  List<Widget> _buildPointWallet(BuildContext context) {
     List<Widget> _walletStack = [];
     _walletStack.add(RaisedButton(
       child: Text('새로운 거래수단 추가하기', style: TextStyle(color: Colors.white),),
@@ -183,7 +183,7 @@ class _PointWalletListViewState extends State<PointWalletListView> {
                 ),
               ),
               SizedBox(height: 5,),
-              Center(child: Text('1,234,567 P', style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
+              Center(child: Text(buildCurrencyString(10000, true), style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
               SizedBox(height: 55,),
             ],
           ),
@@ -199,7 +199,7 @@ class _PointWalletListViewState extends State<PointWalletListView> {
       child: ExpansionTile(
         title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
         initiallyExpanded: true,
-        children: _buildPointWallet(),
+        children: _buildPointWallet(context),
       ),
     );
   }

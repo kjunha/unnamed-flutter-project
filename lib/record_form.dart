@@ -52,20 +52,32 @@ class _RecordFormState extends State<RecordForm> {
           children: [
             txMethod,
             SizedBox(height: 18,),
-            FormBuilderDropdown(
+            FormBuilderTypeAhead(
               attribute: "transaction_tag",
               decoration: InputDecoration(
                 labelText: '테그',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
               ),
-              // initialValue: 'Male',
-              hint: Text('포함하실 테그를 추가해 주세요'),
-              validators: [FormBuilderValidators.required()],
-              items: _dummyCategory
-                .map((value) => DropdownMenuItem(
-                  value: value,
-                  child: Text("$value")
-              )).toList(),
+              suggestionsCallback: (pattern) async {
+                List<String> sorted = [];
+                for(String item in _dummyCategory) {
+                  if(item.contains(pattern)) {
+                    sorted.add(item);
+                  }
+                }
+                return sorted;
+              },
+              itemBuilder: (context, suggestion) {
+                return ListTile(
+                  title: Text(suggestion)
+                );
+              },
+
+              noItemsFoundBuilder: (context) {
+                return ListTile(
+                  title: Text('add new item')
+                );
+              },
             ),
           ],
         ),
