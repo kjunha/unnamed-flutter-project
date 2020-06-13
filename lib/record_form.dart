@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
+import './source_common.dart';
 
 
 class RecordForm extends StatefulWidget {
@@ -12,7 +13,6 @@ class RecordForm extends StatefulWidget {
 
 class _RecordFormState extends State<RecordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
-  final df = DateFormat('yyyy-MM-dd');
   final Map<int, Widget> _children = {
     -1:Text('지출 내역'),
     1:Text('수입 내역')

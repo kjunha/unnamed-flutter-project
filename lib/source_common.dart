@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 final _nf = NumberFormat("#,###.##");
+final df = DateFormat('yyyy-MM-dd');
 final _unit = ' 원';
 final _point = ' P';
 
