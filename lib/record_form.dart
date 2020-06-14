@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
 import './source_common.dart';
+import './model/record.dart';
 
 
 class RecordForm extends StatefulWidget {
@@ -23,12 +25,18 @@ class _RecordFormState extends State<RecordForm> {
   var _dateInput = DateTime.now();
   var _txDescription;
   var _amount;
+  var _txMethod;
+  var _txTag;
 
   //Dummydata field - DEV
   var _dummyMethods = ['np', 'pc', 'gm'];
   var _dummyCategory = ['c1', 'c2', 'c3'];
 
-  Widget selectRecordType() {
+  void _addRecord(Record record) {
+    Hive.box('records').add(record);
+  }
+
+  Widget _selectRecordType() {
     Widget txMethod = (
       FormBuilderDropdown(
         attribute: "transaction_method",
@@ -44,6 +52,9 @@ class _RecordFormState extends State<RecordForm> {
             value: value,
             child: Text("$value")
         )).toList(),
+        onChanged: (value) {setState(() {
+          _txMethod = value;
+        });},
       )
     );
     if(_segctrSelection == -1) {
@@ -78,6 +89,9 @@ class _RecordFormState extends State<RecordForm> {
                   title: Text('add new item')
                 );
               },
+              onChanged: (value) {setState(() {
+                _txTag = value;
+              });},
             ),
           ],
         ),
@@ -125,14 +139,14 @@ class _RecordFormState extends State<RecordForm> {
                       attribute: "date",
                       inputType: InputType.date,
                       format: df,
+                      initialDate: _dateInput,
                       decoration: InputDecoration(
                         labelText: '날짜',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
-                      // onChanged: (value) {setState(() {
-                      //   _dateInput = value;
-                      //   print('date: ' + df.format(_dateInput));
-                      // });},
+                      onChanged: (value) {setState(() {
+                        _dateInput = value;
+                      });},
                     ),
                     SizedBox(height: 18,),
                     TextFormField(
@@ -158,7 +172,7 @@ class _RecordFormState extends State<RecordForm> {
                       });},
                     ),
                     SizedBox(height: 18,),
-                    selectRecordType(),
+                    _selectRecordType(),
                     SizedBox(height: 25,),
                     ButtonTheme(
                       minWidth: double.infinity,
@@ -170,7 +184,14 @@ class _RecordFormState extends State<RecordForm> {
                         //TODO Alert when amount is 0
                         //TODO Alert when txDescription == null
                         //TODO Alert when method == null
-                        onPressed: () {},
+                        onPressed: () {
+                          _formKey.currentState.save();
+                          Record record = _segctrSelection == 1?
+                          new Record(_dateInput, _txDescription, _amount, _txMethod, ''):
+                          new Record(_dateInput, _txDescription, _amount*_segctrSelection, _txMethod, _txTag);
+                          //print('recordInfo: ' + record.toString());
+                          _addRecord(record);
+                        },
                       ),
                     )
                   ],

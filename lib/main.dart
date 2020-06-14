@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'source_common.dart';
 import './record_form.dart';
 import './method_form.dart';
@@ -13,12 +15,39 @@ main() => runApp(ExtraCreditApp());
 //Sandbox
 //main() => runApp(Sandbox());
 
-class ExtraCreditApp extends StatelessWidget {
+class ExtraCreditApp extends StatefulWidget {
+  @override
+  _ExtraCreditAppState createState() => _ExtraCreditAppState();
+}
+
+class _ExtraCreditAppState extends State<ExtraCreditApp> {
+
+  Future<dynamic> _initialDBSetup() async {
+    final _appDocDir = await path_provider.getApplicationDocumentsDirectory();
+    Hive.init(_appDocDir.path);
+    final methodsBox = await Hive.openBox('methods');
+    final recordsBox = await Hive.openBox('records');
+    return [methodsBox, recordsBox];
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Extra Credit',
-      home: Overview(),
+      home: FutureBuilder(
+        future: _initialDBSetup(),
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.done) {
+            if(snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            } else {
+              return Overview();
+            }
+          } else {
+            return Text('Waiting');
+          }
+        },
+      ),
       routes: {
         '/add': (context) => RecordForm(),
         //'/about': (context) => AboutApp(),
@@ -29,6 +58,13 @@ class ExtraCreditApp extends StatelessWidget {
       },
     );
   }
+
+  @override
+  void dispose() {
+    Hive.close();
+    super.dispose();
+  }
+
 }
 
 class Overview extends StatefulWidget {
