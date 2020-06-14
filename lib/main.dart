@@ -1,6 +1,8 @@
+import 'package:finance_point/model/record.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'source_common.dart';
 import './record_form.dart';
@@ -25,6 +27,7 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
   Future<dynamic> _initialDBSetup() async {
     final _appDocDir = await path_provider.getApplicationDocumentsDirectory();
     Hive.init(_appDocDir.path);
+    Hive.registerAdapter(RecordAdapter());
     final methodsBox = await Hive.openBox('methods');
     final recordsBox = await Hive.openBox('records');
     return [methodsBox, recordsBox];
@@ -74,40 +77,44 @@ class Overview extends StatefulWidget {
 }
 
 class _OverviewState extends State<Overview> {
-  var _dummy = [
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/07", "value":"10000"},
-    {"date": "2020/06/07", "value":"10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/03", "value":"10000"},
-    {"date": "2020/05/30", "value":"10000"}
-  ];
+
+  List<Record> _loadRecordfromDB() {
+    print('Debugging: 레코드 데이터 로드');
+    final recordsBox = Hive.box('records');
+    List<Record> records = [];
+    for(int i = 0; i < recordsBox.length; i++) {
+      records.add(recordsBox.get(i));
+    }
+    return records;
+  }
+
+  //Group List Group bar
   Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text('$groupByValue');
+    return Text(df.format(groupByValue));
   }
 
   //List Tile UI
   Widget _buildRecordList(BuildContext context, dynamic element) {
+    //Record Promise
+    Record record = element as Record;
+    //UI Colors
     var labelColor = Colors.blue;
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
     return Card(
       child: ListTile(
-        title:Text('지출내역 상세기록 ',),
-        subtitle: Text('지불수단'),
+        title:Text(record.description,),
+        subtitle: Text(record.method),
         leading: Container(
-          child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
+          child: Center(child: Text(record.tag, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
           width: 48,
           height: 22,
           decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
         ),
         trailing: Text(
-          buildCurrencyString(10000, false), 
+          buildCurrencyString(record.amount, false), 
           style: TextStyle(
-            color: double.parse(element['value'])>0?positiveTextColor:negativeTextColor, 
+            color: record.amount>0?positiveTextColor:negativeTextColor, 
             fontWeight: FontWeight.bold, fontSize: 18
           ),),
         onTap: () {},
@@ -178,8 +185,11 @@ class _OverviewState extends State<Overview> {
               ]),
             ),
             Flexible(child: GroupedListView(
-              elements: _dummy,
-              groupBy: (element) => element['date'],
+              elements: _loadRecordfromDB(),
+              groupBy: (element) {
+                final record = element as Record;
+                return record.date;
+              },
               groupSeparatorBuilder: _buildGroupSeparator,
               itemBuilder: _buildRecordList,
               shrinkWrap: true,
