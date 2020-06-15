@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_chips_input/flutter_chips_input.dart';
+import 'package:hive/hive.dart';
+import './model/method.dart';
 
 class MethodForm extends StatefulWidget {
   @override
@@ -9,6 +11,15 @@ class MethodForm extends StatefulWidget {
 
 class _MethodFormState extends State<MethodForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  List<Method> methodsList = [];
+
+  //State variables
+  var _methodName;
+  var _methodDescription;
+  var _methodType;
+  var _methodColor;
+  var _isTotalAsset = true;
+  var _isOnMain = true;
 
   //Dummydata field -DEV
   var _dummyColor = [Colors.red, Colors.green, Colors.blue];
@@ -33,6 +44,15 @@ class _MethodFormState extends State<MethodForm> {
   }
 
   @override
+  void initState() {
+    final methodsBox = Hive.box('method');
+    for(int i = 0;  i < methodsBox.length; i++) {
+      methodsList.add(methodsBox.get(i));
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('새로운 거래수단 추가하기'), backgroundColor: Colors.blue,),
@@ -44,29 +64,40 @@ class _MethodFormState extends State<MethodForm> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    TextFormField(
+                    FormBuilderTextField(
+                      attribute: 'method_name',
+                      validators: [
+                        (value) { return value.length == 0?'거래수단 이름을 입력해 주세요.':null;}
+                      ],
+                      maxLines: 1,
                       decoration: InputDecoration(
                         labelText: '거래수단 이름',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
                       onChanged: (value) {setState(() {
-
+                        _methodName = value;
                       });},
                     ),
                     SizedBox(height: 18,),
-                    TextFormField(
+                    //Description is optional
+                    FormBuilderTextField(
+                      attribute: 'method_description',
+                      maxLines: 1,
                       decoration: InputDecoration(
                         labelText: '거래수단 설명',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
                       onChanged: (value) {setState(() {
-
+                        _methodDescription = value;
                       });},
                     ),
                     SizedBox(height: 10,),
                     Divider(thickness: 2,),
                     FormBuilderChoiceChip(
                       alignment: WrapAlignment.center,
+                      validators: [
+                        (value) { return value == null?'거래수단 종류를 선택해 주세요.':null;}
+                      ],
                       spacing: 8,
                       decoration: InputDecoration(
                         labelText: '거래수단 종류',
@@ -91,6 +122,9 @@ class _MethodFormState extends State<MethodForm> {
                           value: "point"
                         ),
                       ],
+                      onChanged: (value) {
+                        _methodType = value;
+                      },
                     ),
                     SizedBox(height: 18,),
                     FormBuilderChoiceChip(
@@ -101,20 +135,32 @@ class _MethodFormState extends State<MethodForm> {
                         border: InputBorder.none
                       ),
                       attribute: "method_type",
+                      validators: [
+                        (value) { return value == null?'선택하지 않으실 경우 기본색은 회색으로 지정됩니다.':null;}
+                      ],
                       options: _randerColorOption(),
-                      onChanged: (value) {if(value != null) {print('color selection: ' + value);} else {print('value is null');}},
+                      onChanged: (value) {
+                        _methodColor = '#333333';
+                        if(value != null) {print('color selection: ' + value);} else {print('value is null');}
+                      },
                     ),
                     FormBuilderSwitch(
                       label: Text('이 거래수단을 총자산에 추가합니다'),
                       attribute: "include_total_asset",
-                      initialValue: true,
+                      initialValue: _isTotalAsset,
                       decoration: InputDecoration(border: InputBorder.none),
+                      onChanged: (value) {
+                        _isTotalAsset = value;
+                      },
                     ),
                     FormBuilderSwitch(
                       label: Text('이 거래수단을 메인 페이지에 표시합니다'),
                       attribute: "add_to_main",
-                      initialValue: true,
+                      initialValue: _isOnMain,
                       decoration: InputDecoration(border: InputBorder.none),
+                      onChanged: (value) {
+                        _isOnMain = value;
+                      },
                     ),
                     ButtonTheme(
                       minWidth: double.infinity,
@@ -126,7 +172,14 @@ class _MethodFormState extends State<MethodForm> {
                         //TODO Alert when amount is 0
                         //TODO Alert when txDescription == null
                         //TODO Alert when method == null
-                        onPressed: () {},
+                        onPressed: () {
+                          if(_formKey.currentState.saveAndValidate()) {
+                            print("모든 validation 통과");
+                            _formKey.currentState.reset();
+                          } else {
+                            print("validation 실패");
+                          }
+                        },
                       ),
                     )
                   ],
