@@ -66,7 +66,24 @@ class _RecordFormState extends State<RecordForm> {
             SizedBox(height: 18,),
             FormBuilderTypeAhead(
               attribute: "transaction_tag",
-              initialValue: '',
+              validators: [
+                (value) {
+                  if(value == null) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('테그가 입력되지 않았습니다.'),
+                          content: Column(children: [
+                            Text('새로 추가하는 수입 및 지출내역에 테그가 입력되지 않았습니다.')
+                          ],),
+                          actions: [],
+                        );
+                      });
+                  }
+                  return '';
+                }
+              ],
               decoration: InputDecoration(
                 labelText: '테그',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
@@ -196,31 +213,31 @@ class _RecordFormState extends State<RecordForm> {
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         onPressed: () {
-                          _formKey.currentState.saveAndValidate();
-                          Record record = _segctrSelection == 1?
-                          new Record(_dateInput, _txDescription, _amount, _txMethod, ''):
-                          new Record(_dateInput, _txDescription, _amount*_segctrSelection, _txMethod, _txTag);
-                          //print('recordInfo: ' + record.toString());
-                          _addRecord(record);
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('입력 완료'),
-                                content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),
-                                actions: <Widget>[
-                                  FlatButton(
-                                    child: Text('확인'),
-                                    onPressed: () {
-                                      _formKey.currentState.reset();
-                                      Navigator.pop(context);
-                                    },
-                                  )
-                                ],
-                              );
-                            }
-                          );
-
+                          if(_formKey.currentState.saveAndValidate()) {
+                            Record record = _segctrSelection == 1?
+                            new Record(_dateInput, _txDescription, _amount, _txMethod, ''):
+                            new Record(_dateInput, _txDescription, _amount*_segctrSelection, _txMethod, _txTag);
+                            //print('recordInfo: ' + record.toString());
+                            _addRecord(record);
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('입력 완료'),
+                                  content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('확인'),
+                                      onPressed: () {
+                                        _formKey.currentState.reset();
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                );
+                              }
+                            );
+                          }
                         },
                       ),
                     )
