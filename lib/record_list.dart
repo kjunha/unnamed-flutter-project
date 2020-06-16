@@ -110,13 +110,13 @@ class TxRecordGroupListView extends StatelessWidget {
       ),
       secondaryActions: <Widget>[
         IconSlideAction(
-          caption: 'More',
+          caption: '수정',
           color: Colors.black45,
-          icon: Icons.more_horiz,
+          icon: Icons.mode_edit,
           onTap: () => print('More'),
         ),
         IconSlideAction(
-          caption: 'Delete',
+          caption: '삭제',
           color: Colors.red,
           icon: Icons.delete,
           onTap: () => print('Delete'),

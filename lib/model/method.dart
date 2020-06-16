@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 
 part 'method.g.dart';
-@HiveType()
+@HiveType(typeId: 1)
 class Method {
   @HiveField(1)
   String name;

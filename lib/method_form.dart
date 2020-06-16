@@ -43,14 +43,15 @@ class _MethodFormState extends State<MethodForm> {
     return colorOptionRadio;
   }
 
-  @override
-  void initState() {
-    final methodsBox = Hive.box('method');
-    for(int i = 0;  i < methodsBox.length; i++) {
-      methodsList.add(methodsBox.get(i));
-    }
-    super.initState();
-  }
+  // TODO Hive box needs to be open again.
+  // @override
+  // void initState() async {
+  //   final methodsBox = await Hive.openBox('method');
+  //   for(int i = 0;  i < methodsBox.length; i++) {
+  //     methodsList.add(methodsBox.get(i));
+  //   }
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +68,9 @@ class _MethodFormState extends State<MethodForm> {
                     FormBuilderTextField(
                       attribute: 'method_name',
                       validators: [
-                        (value) { return value.length == 0?'거래수단 이름을 입력해 주세요.':null;}
+                        (value) { 
+                          return value.length == 0?'거래수단 이름을 입력해 주세요.':null;
+                        }
                       ],
                       maxLines: 1,
                       decoration: InputDecoration(

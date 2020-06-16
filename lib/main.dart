@@ -13,9 +13,9 @@ import './method_list.dart';
 
 //Sandbox Dependency
 
-main() => runApp(ExtraCreditApp());
+//main() => runApp(ExtraCreditApp());
 //Sandbox
-//main() => runApp(Sandbox());
+main() => runApp(Sandbox());
 
 class ExtraCreditApp extends StatefulWidget {
   @override
@@ -258,15 +258,37 @@ class Sandbox extends StatefulWidget {
 }
 
 class _SandboxState extends State<Sandbox> {
+  final _dummy = [1,2,3,4,5];
+  Widget _buildListItem(BuildContext context, int index) {
+    return ListTile(
+      title: Text('item ' + _dummy[index].toString()),
+      subtitle: Text('my item'),
+      trailing: SizedBox(width: 96, child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {},
+          )
+        ],
+      ),),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange,),
-        drawer: loadDrawer(context),
+        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange, actions: [IconButton(icon: Icon(Icons.add), onPressed: () {},)],),
         body:Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('hi')
+            Flexible(child: ListView.builder(
+              itemCount: _dummy.length,
+              itemBuilder: _buildListItem
+            ),)
           ],
         )
       ),

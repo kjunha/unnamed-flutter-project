@@ -3,7 +3,7 @@ import '../source_common.dart';
 
 part 'record.g.dart';
 
-@HiveType()
+@HiveType(typeId: 0)
 class Record {
   @HiveField(0)
   DateTime date;
