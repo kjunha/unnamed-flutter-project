@@ -1,0 +1,83 @@
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import './contact.dart';
+import './relationship_enum.dart';
+
+class AddContact extends StatefulWidget {
+  final formKey = GlobalKey<FormState>();
+
+@override
+  _AddContactState createState() => _AddContactState();
+}
+
+class _AddContactState extends State<AddContact> {
+  String name;
+  int age;
+  String phoneNumber;
+  Relationship relationship;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body:SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            key: widget.key,
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: '',
+                    decoration: InputDecoration(labelText: 'Name'),
+                    onChanged: (value) {
+                      name = value;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: '',
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: 'Age'),
+                    onChanged: (value) {
+                      age = int.parse(value);
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: '',
+                    decoration: InputDecoration(labelText: 'Phone'),
+                    onChanged: (value) {
+                      phoneNumber = value;
+                    },
+                  ),
+                  DropdownButton(
+                    items: relationshipString.keys.map((Relationship value) {
+                      return DropdownMenuItem<Relationship>(
+                        value: value,
+                        child: Text(relationshipString[value]),  
+                      );
+                    }).toList(),
+                    value: relationship,
+                    hint: Text('Relationship'),
+                    onChanged: (value) {
+                      relationship = value;
+                    },
+                  ),
+                  RaisedButton(
+                    child: Text('submit'),
+                    onPressed: () {
+                      Box contactsBox = Hive.box('contacts');
+                      contactsBox.add(Contact(name, age, phoneNumber, relationship));
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              )
+            ),
+          ),
+        ),
+      )
+    );
+  }
+}

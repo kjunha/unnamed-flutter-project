@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_tutorial/add_contact.dart';
+import './contact.dart';
+import './relationship_enum.dart';
+
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(ContactAdapter());
+  Hive.registerAdapter(RelationshipAdapter());
+  await Hive.openBox('contacts');
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: MyHomePage(),
+      routes: {
+        '/add':(context) => AddContact()
+      },
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hive test'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+          )
+        ],
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: Hive.box('contacts').listenable(),
+        builder: (context, box, _) {
+          if(box.values.isEmpty) return Center(child: Text('Nothing to show'));
+          return ListView.builder(
+            itemCount: box.values.length,
+            itemBuilder: (context, index) {
+              Contact currentValue = box.getAt(index);
+              String relationship = relationshipString[currentValue.relationship];
+              return Card(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      ListTile(
+                        leading: Text(currentValue.name),
+                        title: Text(currentValue.phoneNumber),
+                        subtitle: Text('Relationship: $relationship | Age: ${currentValue.age.toString()}'),
+                        trailing: SizedBox(
+                          width: 96, 
+                          child: Row(
+                            children: <Widget>[
+                              IconButton(
+                                icon:Icon(Icons.delete),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    child: AlertDialog(
+                                      content: Text('Are you sure?'),
+                                      actions: <Widget>[
+                                        FlatButton(
+                                          child: Text('No'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        FlatButton(
+                                          child: Text('Yes'),
+                                          onPressed: () async {
+                                            await box.deleteAt(index);
+                                            Navigator.of(context).pop();
+                                          },
+                                        )
+                                      ],
+
+                                    )
+                                  );
+                                },
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              );
+            }
+          );
+        }
+      )
+    );
+  }
+}
