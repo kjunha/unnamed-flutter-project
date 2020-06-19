@@ -3,9 +3,9 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_chips_input/flutter_chips_input.dart';
 import './source_common.dart';
 import './model/record.dart';
+import './model/method.dart';
 
 
 class RecordForm extends StatefulWidget {
@@ -214,9 +214,10 @@ class _RecordFormState extends State<RecordForm> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         onPressed: () {
                           if(_formKey.currentState.saveAndValidate()) {
+                            Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
                             Record record = _segctrSelection == 1?
-                            new Record(_dateInput, _txDescription, _amount, _txMethod, ''):
-                            new Record(_dateInput, _txDescription, _amount*_segctrSelection, _txMethod, _txTag);
+                            new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
+                            new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
                             //print('recordInfo: ' + record.toString());
                             _addRecord(record);
                             showDialog(
@@ -230,7 +231,7 @@ class _RecordFormState extends State<RecordForm> {
                                       child: Text('확인'),
                                       onPressed: () {
                                         _formKey.currentState.reset();
-                                        Navigator.pop(context);
+                                        Navigator.of(context).pop();
                                       },
                                     )
                                   ],

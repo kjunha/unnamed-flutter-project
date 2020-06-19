@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
+//common source
 import 'source_common.dart';
+//import model
+import './model/record.dart';
+import './model/method.dart';
+//router
 import './record_form.dart';
 import './method_form.dart';
 import './drawer_common.dart';
@@ -13,9 +17,16 @@ import './method_list.dart';
 
 //Sandbox Dependency
 
-//main() => runApp(ExtraCreditApp());
+main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(RecordAdapter());
+  Hive.registerAdapter(MethodAdapter());
+  await Hive.openBox('records');
+  await Hive.openBox('methods');
+  runApp(ExtraCreditApp());
+}
 //Sandbox
-main() => runApp(Sandbox());
+//main() => runApp(Sandbox());
 
 class ExtraCreditApp extends StatefulWidget {
   @override
@@ -23,34 +34,11 @@ class ExtraCreditApp extends StatefulWidget {
 }
 
 class _ExtraCreditAppState extends State<ExtraCreditApp> {
-
-  Future<dynamic> _initialDBSetup() async {
-    final _appDocDir = await path_provider.getApplicationDocumentsDirectory();
-    Hive.init(_appDocDir.path);
-    Hive.registerAdapter(RecordAdapter());
-    final methodsBox = await Hive.openBox('methods');
-    final recordsBox = await Hive.openBox('records');
-    return [methodsBox, recordsBox];
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Extra Credit',
-      home: FutureBuilder(
-        future: _initialDBSetup(),
-        builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.done) {
-            if(snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            } else {
-              return Overview();
-            }
-          } else {
-            return Text('Waiting');
-          }
-        },
-      ),
+      home: Overview(),
       routes: {
         '/add': (context) => RecordForm(),
         //'/about': (context) => AboutApp(),
@@ -78,14 +66,12 @@ class Overview extends StatefulWidget {
 
 class _OverviewState extends State<Overview> {
 
-  List<Record> _loadRecordfromDB() {
-    print('Debugging: 레코드 데이터 로드');
-    final recordsBox = Hive.box('records');
-    List<Record> records = [];
-    for(int i = 0; i < recordsBox.length; i++) {
-      records.add(recordsBox.get(i));
+  List<Record> _readBoxData(Box box) {
+    List<Record> recordList = [];
+    for(int i = 0; i < box.length; i++) {
+      recordList.add(box.getAt(i));
     }
-    return records;
+    return recordList;
   }
 
   //Group List Group bar
@@ -104,7 +90,7 @@ class _OverviewState extends State<Overview> {
     return Card(
       child: ListTile(
         title:Text(record.description,),
-        subtitle: Text(record.method),
+        subtitle: Text(record.method.name),
         leading: Container(
           child: Center(child: Text(record.tag, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
           width: 48,
@@ -184,17 +170,24 @@ class _OverviewState extends State<Overview> {
                 ),
               ]),
             ),
-            Flexible(child: GroupedListView(
-              elements: _loadRecordfromDB(),
-              groupBy: (element) {
-                final record = element as Record;
-                return record.date;
+            ValueListenableBuilder(
+              valueListenable: Hive.box('records').listenable(),
+              builder: (context, box, _) {
+                if(box.values.isEmpty) return Center(child: Text('nothing to show'));
+                return Flexible(child: GroupedListView(
+                  elements: _readBoxData(box),
+                  groupBy: (element) {
+                    final record = element as Record;
+                    return record.date;
+                  },
+                  groupSeparatorBuilder: _buildGroupSeparator,
+                  itemBuilder: _buildRecordList,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                ),);
               },
-              groupSeparatorBuilder: _buildGroupSeparator,
-              itemBuilder: _buildRecordList,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-            ),)
+
+            )
           ],
         ),
       )

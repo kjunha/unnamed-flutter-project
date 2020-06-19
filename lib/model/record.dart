@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import '../source_common.dart';
+import './method.dart';
 
 part 'record.g.dart';
 
@@ -12,7 +13,7 @@ class Record {
   @HiveField(2)
   String description;
   @HiveField(3)
-  String method;
+  Method method;
   @HiveField(4)
   String tag;
 
@@ -20,6 +21,6 @@ class Record {
 
   @override
   String toString() {
-    return '날짜: ' + df.format(date) + ', 내역: ' + description + ', 금액: ' + buildCurrencyString(amount, false) + ', 수단: ' + method + ', 테그: ' + tag; 
+    return '날짜: ' + df.format(date) + ', 내역: ' + description + ', 금액: ' + buildCurrencyString(amount, false) + ', 수단: ' + method.name + ', 테그: ' + tag; 
   }
 }

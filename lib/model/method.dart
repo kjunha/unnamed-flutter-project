@@ -16,5 +16,5 @@ class Method {
   @HiveField(6)
   bool isMain;
   
-  Method(this.name, this.description, this.colorHex, this.isIncluded, this.isMain);
+  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain);
 }

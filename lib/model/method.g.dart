@@ -8,6 +8,9 @@ part of 'method.dart';
 
 class MethodAdapter extends TypeAdapter<Method> {
   @override
+  final typeId = 1;
+
+  @override
   Method read(BinaryReader reader) {
     var numOfFields = reader.readByte();
     var fields = <int, dynamic>{
@@ -16,10 +19,11 @@ class MethodAdapter extends TypeAdapter<Method> {
     return Method(
       fields[1] as String,
       fields[2] as String,
+      fields[3] as String,
       fields[4] as String,
       fields[5] as bool,
       fields[6] as bool,
-    )..type = fields[3] as String;
+    );
   }
 
   @override
@@ -39,8 +43,4 @@ class MethodAdapter extends TypeAdapter<Method> {
       ..writeByte(6)
       ..write(obj.isMain);
   }
-
-  @override
-  // TODO: implement typeId
-  int get typeId => 1;
 }

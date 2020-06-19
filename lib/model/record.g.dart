@@ -8,6 +8,9 @@ part of 'record.dart';
 
 class RecordAdapter extends TypeAdapter<Record> {
   @override
+  final typeId = 0;
+
+  @override
   Record read(BinaryReader reader) {
     var numOfFields = reader.readByte();
     var fields = <int, dynamic>{
@@ -17,7 +20,7 @@ class RecordAdapter extends TypeAdapter<Record> {
       fields[0] as DateTime,
       fields[2] as String,
       fields[1] as double,
-      fields[3] as String,
+      fields[3] as Method,
       fields[4] as String,
     );
   }
@@ -37,8 +40,4 @@ class RecordAdapter extends TypeAdapter<Record> {
       ..writeByte(4)
       ..write(obj.tag);
   }
-
-  @override
-  // TODO: implement typeId
-  int get typeId => 0;
 }

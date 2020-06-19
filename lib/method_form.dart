@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_chips_input/flutter_chips_input.dart';
 import 'package:hive/hive.dart';
 import './model/method.dart';
 
@@ -177,7 +176,7 @@ class _MethodFormState extends State<MethodForm> {
                         //TODO Alert when method == null
                         onPressed: () {
                           if(_formKey.currentState.saveAndValidate()) {
-                            print("모든 validation 통과");
+                            Hive.box('methods').add(Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain));
                             _formKey.currentState.reset();
                           } else {
                             print("validation 실패");
