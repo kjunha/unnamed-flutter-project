@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import './model/record.dart';
 import './source_common.dart';
 import './drawer_common.dart';
 
@@ -12,6 +15,88 @@ class RecordList extends StatefulWidget {
 
 class _RecordListState extends State<RecordList> {
   final _formKey = GlobalKey<FormBuilderState>();
+
+  List<Record> _readBoxData(Box box) {
+    List<Record> recordList = [];
+    for(int i = 0; i < box.length; i++) {
+      recordList.add(box.getAt(i));
+    }
+    return recordList;
+  }
+
+  Widget _buildGroupSeparator(dynamic groupByValue) {
+    return Text(df.format(groupByValue));
+  }
+
+  //List Tile UI
+  Widget _buildRecordList(BuildContext context, Record element, int key) {
+    var labelColor = Colors.blue;
+    var positiveTextColor = Colors.green;
+    var negativeTextColor = Colors.red;
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      actionExtentRatio: 0.25,
+      child: Card(
+        child: ListTile(
+          title:Text('지출내역 상세기록 ',),
+          subtitle: Text('지불수단'),
+          leading: Container(
+            child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
+            width: 48,
+            height: 22,
+            decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
+          ),
+          trailing: Text(
+            buildCurrencyString(element.amount, false), 
+            style: TextStyle(
+              color: element.amount>0?positiveTextColor:negativeTextColor, 
+              fontWeight: FontWeight.bold, fontSize: 18
+            ),),
+          onTap: () {},
+        ),
+      ),
+      secondaryActions: <Widget>[
+        IconSlideAction(
+          caption: '수정',
+          color: Colors.black45,
+          icon: Icons.mode_edit,
+          onTap: () {
+            showDialog(context: null);
+          },
+        ),
+        IconSlideAction(
+          caption: '삭제',
+          color: Colors.red,
+          icon: Icons.delete,
+          onTap: () {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              child: AlertDialog(
+                content: Text('정말로 삭제하시겠습니까?'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('아니오'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('네'),
+                    onPressed: () async {
+                      await Hive.box('records').deleteAt(key);
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              )
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,82 +144,35 @@ class _RecordListState extends State<RecordList> {
             ],),)
           ],
         ),),),
-        Flexible(child:TxRecordGroupListView()),
+        ValueListenableBuilder(
+          valueListenable: Hive.box('records').listenable(),
+          builder: (context, box, _) {
+            if(box.values.isEmpty) {
+              return Center(child: Text('Nothing to show'),);
+            }
+            return Flexible(child: GroupedListView(
+              elements: _readBoxData(box),
+              groupBy: (element) {
+                final record = element as Record;
+                return record.date;
+              },
+              groupSeparatorBuilder: _buildGroupSeparator,
+              itemBuilder: (context,element) {
+                var keys = box.keys.toList();
+                for(int key in keys) {
+                  if(box.getAt(key).hashCode == element.hashCode) {
+                    return _buildRecordList(context, element, key);
+                  }
+                }
+                return null;
+              },
+              shrinkWrap: false,
+              //physics: const NeverScrollableScrollPhysics(),
+              physics: null,
+            ),);
+          },
+        ),
       ],)
-    );
-  }
-}
-
-class TxRecordGroupListView extends StatelessWidget {
-  final _dummy = [
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/05", "value":"-123.4567"},
-    {"date": "2020/06/07", "value":"-10000"},
-    {"date": "2020/06/07", "value":"5432.12345"},
-    {"date": "2020/06/05", "value":"-10000"},
-    {"date": "2020/06/05", "value":"10000"},
-    {"date": "2020/06/03", "value":"-10000"},
-    {"date": "2020/05/30", "value":"100000000"}
-  ];
-  Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text('$groupByValue');
-  }
-
-  //List Tile UI
-  Widget _buildRecordList(BuildContext context, dynamic element) {
-    var labelColor = Colors.blue;
-    var positiveTextColor = Colors.green;
-    var negativeTextColor = Colors.red;
-    return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.25,
-      child: Card(
-        child: ListTile(
-          title:Text('지출내역 상세기록 ',),
-          subtitle: Text('지불수단'),
-          leading: Container(
-            child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
-            width: 48,
-            height: 22,
-            decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
-          ),
-          trailing: Text(
-            buildCurrencyString(double.parse(element['value']), false), 
-            style: TextStyle(
-              color: double.parse(element['value'])>0?positiveTextColor:negativeTextColor, 
-              fontWeight: FontWeight.bold, fontSize: 18
-            ),),
-          onTap: () {},
-        ),
-      ),
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: '수정',
-          color: Colors.black45,
-          icon: Icons.mode_edit,
-          onTap: () => print('More'),
-        ),
-        IconSlideAction(
-          caption: '삭제',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () => print('Delete'),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GroupedListView(
-      elements: _dummy,
-      groupBy: (element) => element['date'],
-      groupSeparatorBuilder: _buildGroupSeparator,
-      itemBuilder: _buildRecordList,
-      shrinkWrap: false,
-      //physics: const NeverScrollableScrollPhysics(),
-      physics: null,
     );
   }
 }
