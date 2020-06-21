@@ -29,7 +29,7 @@ class _RecordListState extends State<RecordList> {
   }
 
   //List Tile UI
-  Widget _buildRecordList(BuildContext context, Record element, int key) {
+  Widget _buildRecordList(BuildContext context, Record element, Box box) {
     var labelColor = Colors.blue;
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
@@ -84,6 +84,18 @@ class _RecordListState extends State<RecordList> {
                   FlatButton(
                     child: Text('네'),
                     onPressed: () async {
+                      var keys = box.keys.toList();
+                      var key;
+                      for(int i = 0; i < keys.length; i++) {
+                        if(box.getAt(i).hashCode == element.hashCode) {
+                          key = i;
+                          print('key found: $key');
+                          break;
+                        }
+                      }
+                      if(key == null) {
+                        print('key not found');
+                      }
                       await Hive.box('records').deleteAt(key);
                       Navigator.of(context).pop();
                     },
@@ -158,13 +170,14 @@ class _RecordListState extends State<RecordList> {
               },
               groupSeparatorBuilder: _buildGroupSeparator,
               itemBuilder: (context,element) {
-                var keys = box.keys.toList();
-                for(int key in keys) {
-                  if(box.getAt(key).hashCode == element.hashCode) {
-                    return _buildRecordList(context, element, key);
-                  }
-                }
-                return null;
+                // var keys = box.keys.toList();
+                // for(int key in keys) {
+                //   if(box.getAt(key).hashCode == element.hashCode) {
+                //     return _buildRecordList(context, element, key);
+                //   }
+                // }
+                // return null;
+                return _buildRecordList(context, element, box);
               },
               shrinkWrap: false,
               //physics: const NeverScrollableScrollPhysics(),
