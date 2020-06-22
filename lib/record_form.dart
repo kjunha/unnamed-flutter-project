@@ -1,6 +1,3 @@
-
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
@@ -32,7 +29,8 @@ class _RecordFormState extends State<RecordForm> {
     -1:Text('지출 내역'),
     1:Text('수입 내역')
   };
-
+  List<String> _methodNameList = [];
+  
   //State variable
   var _segctrSelection;
   var _dateInput;
@@ -42,9 +40,15 @@ class _RecordFormState extends State<RecordForm> {
   var _txTag;
   var _boxKey;
 
+
   @override
   void initState() {
     super.initState();
+    Box box = Hive.box('methods');
+    List<dynamic> keys = box.keys.toList();
+    for(dynamic key in keys) {
+      _methodNameList.add(key);
+    }
     if(widget.mode == FormMode.ADD) {
       _segctrSelection = -1;
       _dateInput = DateTime.now();
@@ -60,19 +64,21 @@ class _RecordFormState extends State<RecordForm> {
   }
 
   //Dummydata field - DEV
-  var _dummyMethods = ['np', 'pc', 'gm'];
   var _dummyCategory = ['c1', 'c2', 'c3'];
 
   //Button Action Handler
   //on pressed for new record
   void _addNewRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method _dummyMtd = Method(_txMethod, '', 'credit', 0xffffff, true, true,0,0);
-      Record record = _segctrSelection == 1?
-      new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
-      new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
-      //print('recordInfo: ' + record.toString());
-      Hive.box('records').add(record);
+      Method method = Hive.box('methods').get(_txMethod);
+      if(_segctrSelection == 1) {
+        Hive.box('records').add(Record(_dateInput, _txDescription, _amount, method, ''));
+        method.incSubtotal += _amount;
+      } else {
+        Hive.box('records').add(Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
+        method.expSubTotal += _amount;
+      }
+      Hive.box('methods').put(_txMethod,method);
       showDialog(
         context: context,
         builder: (context) {
@@ -137,7 +143,7 @@ class _RecordFormState extends State<RecordForm> {
         hint: Text('거래수단을 선택해주세요'),
         validators: [(value) { return value == null? "거래수단은 필수항목입니다.":null;},],
         initialValue: _txMethod,
-        items: _dummyMethods
+        items: _methodNameList
           .map((value) => DropdownMenuItem(
             value: value,
             child: Text("$value")
@@ -284,7 +290,7 @@ class _RecordFormState extends State<RecordForm> {
                         }
                       ],
                       maxLines: 1,
-                      initialValue: _amount.toString(),
+                      initialValue: _amount==null?'':_amount.toString(),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '금액',

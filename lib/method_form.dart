@@ -10,7 +10,7 @@ class MethodForm extends StatefulWidget {
 
 class _MethodFormState extends State<MethodForm> {
   final _formKey = GlobalKey<FormBuilderState>();
-  List<Method> methodsList = [];
+  List<String> methodsNameList = [];
 
   //State variables
   String _methodName;
@@ -26,7 +26,8 @@ class _MethodFormState extends State<MethodForm> {
   //Button Action Handler
   void _addNewMethod() {
     if(_formKey.currentState.saveAndValidate()) {
-      Hive.box('methods').add(Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0));
+      methodsNameList.add(_methodName);
+      Hive.box('methods').put(_methodName ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0));
       showDialog(
         context: context,
         builder: (context) {
@@ -72,6 +73,17 @@ class _MethodFormState extends State<MethodForm> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    Box box = Hive.box('methods');
+    List<dynamic> keys = box.keys.toList();
+    for(dynamic key in keys) {
+      Method mtd = box.get(key);
+      methodsNameList.add(mtd.name);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('새로운 거래수단 추가하기'), backgroundColor: Colors.blue,),
@@ -88,6 +100,9 @@ class _MethodFormState extends State<MethodForm> {
                       validators: [
                         (value) { 
                           return value.length == 0?'거래수단 이름을 입력해 주세요.':null;
+                        },
+                        (value) {
+                          return methodsNameList.indexOf(value) != -1?'이미 등록된 이름입니다':null;
                         }
                       ],
                       maxLines: 1,

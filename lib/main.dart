@@ -77,12 +77,59 @@ class Overview extends StatefulWidget {
 
 class _OverviewState extends State<Overview> {
 
-  List<Record> _readBoxData(Box box) {
+  List<Record> _readRecordData(Box box) {
     List<Record> recordList = [];
     for(int i = 0; i < box.length; i++) {
       recordList.add(box.getAt(i));
     }
     return recordList;
+  }
+
+  List<Method> _readMethodData(Box box) {
+    List<Method> methodList = [];
+    List<dynamic> keys = box.keys.toList();
+    for(dynamic key in keys) {
+      methodList.add(box.get(key));
+    }
+    return methodList;
+  }
+
+  //Method Card builder
+  List<Widget> _buildPointWallet(BuildContext context) {
+    List<Method> methods = _readMethodData(Hive.box('methods'));
+    List<Widget> _walletStack = [];
+    _walletStack.add(RaisedButton(
+      child: Text('새로운 거래수단 추가하기', style: TextStyle(color: Colors.white),),
+      color: Colors.blue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      onPressed: () {Navigator.pushNamed(context, '/new');},
+    ));
+    for(Method method in methods) {
+      if(method.isMain) {
+        _walletStack.add(
+          Card(
+            color: Color(method.colorHex),
+            margin: EdgeInsets.symmetric(vertical: 3,horizontal:25),
+            child: Column(
+              children: <Widget>[
+                ListTile(
+                  title: Text(method.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+                  subtitle: Text(method.description, style: TextStyle(color: Colors.grey[200]),), 
+                  trailing: IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () {},
+                  ),
+                ),
+                SizedBox(height: 5,),
+                Center(child: Text(buildCurrencyString(getMethodTotal(method), method.type == 'point'), style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
+                SizedBox(height: 55,),
+              ],
+            ),
+          )
+        );
+      }
+    }
+    return _walletStack;
   }
 
   //Group List Group bar
@@ -136,8 +183,20 @@ class _OverviewState extends State<Overview> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TxMethodWalletListView(),
-            //수입 및 지출내역 block
+            //거래수단 목록 카드
+            Card(
+              child: ValueListenableBuilder(
+                valueListenable: Hive.box('methods').listenable(),
+                builder: (context, _, __) {
+                  return ExpansionTile(
+                    title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
+                    initiallyExpanded: true,
+                    children: _buildPointWallet(context),
+                  );
+                },
+              ), 
+            ),
+            //수입 및 지출내역 카드
             Card(
               child: Column(children: [
                 ListTile(  
@@ -186,7 +245,7 @@ class _OverviewState extends State<Overview> {
               builder: (context, box, _) {
                 if(box.values.isEmpty) return Center(child: Text('nothing to show'));
                 return Flexible(child: GroupedListView(
-                  elements: _readBoxData(box),
+                  elements: _readRecordData(box),
                   groupBy: (element) {
                     final record = element as Record;
                     return record.date;
@@ -202,55 +261,6 @@ class _OverviewState extends State<Overview> {
           ],
         ),
       )
-    );
-  }
-}
-
-class TxMethodWalletListView extends StatelessWidget {
-  final _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
-
-  List<Widget> _buildPointWallet(BuildContext context) {
-    List<Widget> _walletStack = [];
-    _walletStack.add(RaisedButton(
-      child: Text('새로운 거래수단 추가하기', style: TextStyle(color: Colors.white),),
-      color: Colors.blue,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      onPressed: () {Navigator.pushNamed(context, '/new');},
-    ));
-    for(Color color in _dummy) {
-      _walletStack.add(
-        Card(
-          color: color,
-          margin: EdgeInsets.symmetric(vertical: 3,horizontal:25),
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                title: Text('네이버 페이 포인트', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
-                subtitle: Text('메모할 내용', style: TextStyle(color: Colors.grey[200]),), 
-                trailing: IconButton(
-                  icon: Icon(Icons.settings),
-                  onPressed: () {},
-                ),
-              ),
-              SizedBox(height: 5,),
-              Center(child: Text(buildCurrencyString(10000, true), style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
-              SizedBox(height: 55,),
-            ],
-          ),
-        )
-      );
-    }
-    return _walletStack;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ExpansionTile(
-        title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
-        initiallyExpanded: true,
-        children: _buildPointWallet(context),
-      ),
     );
   }
 }
