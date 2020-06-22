@@ -67,7 +67,7 @@ class _RecordFormState extends State<RecordForm> {
   //on pressed for new record
   void _addNewRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
+      Method _dummyMtd = Method(_txMethod, '', 'credit', 0xffffff, true, true,0,0);
       Record record = _segctrSelection == 1?
       new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
       new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
@@ -97,7 +97,7 @@ class _RecordFormState extends State<RecordForm> {
   //on pressed for edited record
   void _editRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
+      Method _dummyMtd = Method(_txMethod, '', 'credit', 0xffffff, true, true,0,0);
       Record record = _segctrSelection == 1?
       new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
       new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');

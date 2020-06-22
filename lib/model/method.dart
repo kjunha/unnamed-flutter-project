@@ -10,11 +10,15 @@ class Method {
   @HiveField(3)
   String type;
   @HiveField(4)
-  String colorHex;
+  int colorHex;
   @HiveField(5)
   bool isIncluded;
   @HiveField(6)
   bool isMain;
+  @HiveField(7)
+  double incSubtotal; //Subtotal for income
+  @HiveField(8)
+  double expSubTotal; //Subtotal for expenditure
   
-  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain);
+  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain, this.incSubtotal, this.expSubTotal);
 }

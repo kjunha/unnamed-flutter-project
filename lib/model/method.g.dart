@@ -20,16 +20,18 @@ class MethodAdapter extends TypeAdapter<Method> {
       fields[1] as String,
       fields[2] as String,
       fields[3] as String,
-      fields[4] as String,
+      fields[4] as int,
       fields[5] as bool,
       fields[6] as bool,
+      fields[7] as double,
+      fields[8] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, Method obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
@@ -41,6 +43,10 @@ class MethodAdapter extends TypeAdapter<Method> {
       ..writeByte(5)
       ..write(obj.isIncluded)
       ..writeByte(6)
-      ..write(obj.isMain);
+      ..write(obj.isMain)
+      ..writeByte(7)
+      ..write(obj.incSubtotal)
+      ..writeByte(8)
+      ..write(obj.expSubTotal);
   }
 }

@@ -13,44 +13,63 @@ class _MethodFormState extends State<MethodForm> {
   List<Method> methodsList = [];
 
   //State variables
-  var _methodName;
-  var _methodDescription;
-  var _methodType;
-  var _methodColor;
-  var _isTotalAsset = true;
-  var _isOnMain = true;
+  String _methodName;
+  String _methodDescription;
+  String _methodType;
+  int _methodColor;
+  bool _isTotalAsset = true;
+  bool _isOnMain = true;
 
   //Dummydata field -DEV
-  var _dummyColor = [Colors.red, Colors.green, Colors.blue];
+  var _colorSet = [0xff0000, 0x00ff00, 0x0000ff];
 
+  //Button Action Handler
+  void _addNewMethod() {
+    if(_formKey.currentState.saveAndValidate()) {
+      Hive.box('methods').add(Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0));
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('입력 완료'),
+            content: Text('새로운 거래수단이 추가되었습니다.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('확인'),
+                onPressed: () {
+                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
+                },
+              )
+            ]
+          );
+        }
+      );
+    } else {
+      //DEBUG
+      print("validation 실패");
+    }
+  }
+
+  //Chip Option builder
   List<FormBuilderFieldOption> _randerColorOption() {
     List<FormBuilderFieldOption> colorOptionRadio = [];
-    for(Color color in _dummyColor) {
+    for(int hexCode in _colorSet) {
       colorOptionRadio.add(
         FormBuilderFieldOption(
           child: Container(
             decoration: BoxDecoration(
-              color: color, 
-              border: Border.all(color: color), borderRadius: BorderRadius.circular(15) 
+              color: Color(hexCode), 
+              border: Border.all(color: Color(hexCode)), borderRadius: BorderRadius.circular(15) 
               ), 
             width: 30, height: 30
           ),
-          value: color.toString(),
+          value: hexCode,
         ),
       );
     }
     return colorOptionRadio;
   }
-
-  // TODO Hive box needs to be open again.
-  // @override
-  // void initState() async {
-  //   final methodsBox = await Hive.openBox('method');
-  //   for(int i = 0;  i < methodsBox.length; i++) {
-  //     methodsList.add(methodsBox.get(i));
-  //   }
-  //   super.initState();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -136,14 +155,19 @@ class _MethodFormState extends State<MethodForm> {
                         labelText: '표시할 색',
                         border: InputBorder.none
                       ),
-                      attribute: "method_type",
+                      attribute: "method_color",
                       validators: [
                         (value) { return value == null?'선택하지 않으실 경우 기본색은 회색으로 지정됩니다.':null;}
                       ],
                       options: _randerColorOption(),
                       onChanged: (value) {
-                        _methodColor = '#333333';
-                        if(value != null) {print('color selection: ' + value);} else {print('value is null');}
+                        if(value != null) {
+                          _methodColor = value;
+                          print('color selection: ' + value.toString());
+                        } else {
+                          _methodColor = 0x333333;
+                          print('value is null');
+                        }
                       },
                     ),
                     FormBuilderSwitch(
@@ -174,14 +198,7 @@ class _MethodFormState extends State<MethodForm> {
                         //TODO Alert when amount is 0
                         //TODO Alert when txDescription == null
                         //TODO Alert when method == null
-                        onPressed: () {
-                          if(_formKey.currentState.saveAndValidate()) {
-                            Hive.box('methods').add(Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain));
-                            _formKey.currentState.reset();
-                          } else {
-                            print("validation 실패");
-                          }
-                        },
+                        onPressed: _addNewMethod
                       ),
                     )
                   ],
