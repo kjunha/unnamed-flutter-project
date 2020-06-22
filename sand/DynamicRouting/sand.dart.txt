@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import './sand_sub.dart';
+import './model/sand_arg.dart';
+
+main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'sandbox',
+      onGenerateRoute: (setting) {
+        if(SandSub.routeName == setting.name) {
+          final SandArgs args = setting.arguments;
+          print('DEBUG: arguement passed/ ${args.toString()}');
+          return MaterialPageRoute(
+            builder: (context) => SandSub(args)
+          );
+        }
+        return MaterialPageRoute(builder: (_) => Scaffold(
+          body: Center(child: Text('no routes detected'),),
+        ),);
+      },
+      home: Sand()
+    );
+  }
+}
+
+class Sand extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sandbox'), 
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.queue_play_next),
+            onPressed: () {
+              Navigator.pushNamed(context, SandSub.routeName, arguments: SandArgs('MyTitle', 'MyName'));
+            },
+          )
+        ],
+      ),
+      body: Center(child: Text('My Sandbox'),),
+    );
+  }
+}

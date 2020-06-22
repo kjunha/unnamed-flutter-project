@@ -61,7 +61,21 @@ class _RecordListState extends State<RecordList> {
           color: Colors.black45,
           icon: Icons.mode_edit,
           onTap: () {
-            showDialog(context: null);
+            //Find Element Key
+            var keys = box.keys.toList();
+            var key;
+            for(int i = 0; i < keys.length; i++) {
+              if(box.getAt(i).hashCode == element.hashCode) {
+                key = i;
+                print('key found: $key');
+                break;
+              }
+            }
+            if(key == null) {
+              print('key not found');
+            }
+            Record record = Hive.box('records').getAt(key);
+            Navigator.pushNamed(context, '/records/edit', arguments: RecordKeySet(record, key));
           },
         ),
         IconSlideAction(
@@ -84,6 +98,7 @@ class _RecordListState extends State<RecordList> {
                   FlatButton(
                     child: Text('네'),
                     onPressed: () async {
+                      //Find Element Key
                       var keys = box.keys.toList();
                       var key;
                       for(int i = 0; i < keys.length; i++) {

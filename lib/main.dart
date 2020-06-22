@@ -44,8 +44,19 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
         //'/about': (context) => AboutApp(),
         '/new': (context) => MethodForm(),
         '/sand': (context) => Sandbox(),
-        '/edit': (context) => RecordList(),
-        '/manage': (context) => MethodList()
+        '/records': (context) => RecordList(),
+        '/methods': (context) => MethodList()
+      },
+      onGenerateRoute: (setting) {
+        if(setting.name == '/records/edit') {
+          final RecordKeySet valueSet = setting.arguments;
+          return MaterialPageRoute(
+            builder: (_) => RecordForm.edit(valueSet.record, valueSet.key)
+          );
+        }
+        return MaterialPageRoute(builder: (_) => Scaffold(
+          body: Center(child: Text('no routes detected'),),
+        ),);
       },
     );
   }

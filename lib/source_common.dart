@@ -1,3 +1,4 @@
+import './model/record.dart';
 import 'package:intl/intl.dart';
 
 final _nf = NumberFormat("#,###.##");
@@ -7,4 +8,10 @@ final _point = ' P';
 
 String buildCurrencyString(double value, bool isPoint) {
   return _nf.format(value) + " " + (isPoint?_point:_unit);
+}
+
+class RecordKeySet {
+  Record record;
+  int key;
+  RecordKeySet(this.record, this.key);
 }

@@ -1,14 +1,27 @@
+
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import './form_mode_enum.dart';
 import './source_common.dart';
 import './model/record.dart';
 import './model/method.dart';
 
 
 class RecordForm extends StatefulWidget {
+  FormMode mode;
+  Record record;
+  int boxKey;
+  RecordForm() {
+    mode = FormMode.ADD;
+  }
+  RecordForm.edit(this.record, this.boxKey) {
+    mode = FormMode.EDIT;
+  }
   @override
   _RecordFormState createState() => _RecordFormState();
 }
@@ -21,22 +34,97 @@ class _RecordFormState extends State<RecordForm> {
   };
 
   //State variable
-  var _segctrSelection = -1;
-  var _dateInput = DateTime.now();
+  var _segctrSelection;
+  var _dateInput;
   var _txDescription;
   var _amount;
   var _txMethod;
   var _txTag;
+  var _boxKey;
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.mode == FormMode.ADD) {
+      _segctrSelection = -1;
+      _dateInput = DateTime.now();
+    } else {
+      _segctrSelection = widget.record.amount >= 0? 1:-1;
+      _dateInput = widget.record.date;
+      _txDescription = widget.record.description;
+      _amount = widget.record.amount;
+      _txMethod = widget.record.method.name;
+      _txTag = widget.record.tag;
+      _boxKey = widget.boxKey;
+    }
+  }
 
   //Dummydata field - DEV
   var _dummyMethods = ['np', 'pc', 'gm'];
   var _dummyCategory = ['c1', 'c2', 'c3'];
 
-  void _addRecord(Record record) {
-    final recordsBox = Hive.box('records');
-    recordsBox.add(record);
+  //Button Action Handler
+  //on pressed for new record
+  void _addNewRecord() {
+    if(_formKey.currentState.saveAndValidate()) {
+      Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
+      Record record = _segctrSelection == 1?
+      new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
+      new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
+      //print('recordInfo: ' + record.toString());
+      Hive.box('records').add(record);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('입력 완료'),
+            content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('확인'),
+                onPressed: () {
+                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        }
+      );
+    }
   }
 
+  //on pressed for edited record
+  void _editRecord() {
+    if(_formKey.currentState.saveAndValidate()) {
+      Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
+      Record record = _segctrSelection == 1?
+      new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
+      new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
+      //print('recordInfo: ' + record.toString());
+      Hive.box('records').putAt(_boxKey, record);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('입력 완료'),
+            content: Text('수입 및 지출내역이 변경되었습니다.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('확인'),
+                onPressed: () {
+                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        }
+      );
+    }
+  }
+
+  //Dynamic Element by Segment Control
   Widget _selectRecordType() {
     Widget txMethod = (
       FormBuilderDropdown(
@@ -48,6 +136,7 @@ class _RecordFormState extends State<RecordForm> {
         // initialValue: 'Male',
         hint: Text('거래수단을 선택해주세요'),
         validators: [(value) { return value == null? "거래수단은 필수항목입니다.":null;},],
+        initialValue: _txMethod,
         items: _dummyMethods
           .map((value) => DropdownMenuItem(
             value: value,
@@ -134,7 +223,7 @@ class _RecordFormState extends State<RecordForm> {
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
           child: Column(
             children: [
-              Container(
+              widget.mode == FormMode.ADD?Container(
                 width: double.infinity,
                 child: MaterialSegmentedControl(
                   children: _children,
@@ -148,7 +237,7 @@ class _RecordFormState extends State<RecordForm> {
                     });
                   },
                 ),
-              ),
+              ):SizedBox(height:0),
               SizedBox(height: 25,),
               FormBuilder(
                 key: _formKey,
@@ -159,6 +248,7 @@ class _RecordFormState extends State<RecordForm> {
                       inputType: InputType.date,
                       format: df,
                       initialDate: _dateInput,
+                      initialValue: _dateInput,
                       validators: [
                         (value) { return value == null? "날짜는 필수항목 입니다.":null;}
                       ],
@@ -175,6 +265,7 @@ class _RecordFormState extends State<RecordForm> {
                       attribute: "tx_description",
                       validators: [(value) { return value.length == 0? "거래내역은 필수항목 입니다.":null;}],
                       maxLines: 1,
+                      initialValue: _txDescription,
                       decoration: InputDecoration(
                         labelText: '거래내역',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
@@ -193,6 +284,7 @@ class _RecordFormState extends State<RecordForm> {
                         }
                       ],
                       maxLines: 1,
+                      initialValue: _amount.toString(),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '금액',
@@ -205,42 +297,40 @@ class _RecordFormState extends State<RecordForm> {
                     SizedBox(height: 18,),
                     _selectRecordType(),
                     SizedBox(height: 25,),
-                    ButtonTheme(
+                    widget.mode == FormMode.ADD?ButtonTheme(
                       minWidth: double.infinity,
                       height: 50,
                       child: RaisedButton(
                         child: Text('기록 추가', style: TextStyle(color: Colors.white, fontSize: 16),),
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        onPressed: () {
-                          if(_formKey.currentState.saveAndValidate()) {
-                            Method _dummyMtd = Method(_txMethod, '', 'credit', '#ffffff', true, true);
-                            Record record = _segctrSelection == 1?
-                            new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
-                            new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
-                            //print('recordInfo: ' + record.toString());
-                            _addRecord(record);
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text('입력 완료'),
-                                  content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('확인'),
-                                      onPressed: () {
-                                        _formKey.currentState.reset();
-                                        Navigator.of(context).pop();
-                                      },
-                                    )
-                                  ],
-                                );
-                              }
-                            );
-                          }
-                        },
+                        onPressed: _addNewRecord
                       ),
+                    ):Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: ButtonTheme(
+                            height:50, 
+                            child: RaisedButton(
+                              child: Text('변경 취소'),
+                              color: Colors.grey,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 30,),
+                        Expanded(
+                          child: ButtonTheme(
+                              height: 50,
+                              child: RaisedButton(
+                              child: Text('기록 변경'),
+                              onPressed: _editRecord,
+                            ),
+                          ),
+                        )
+                      ],
                     )
                   ],
                 ),

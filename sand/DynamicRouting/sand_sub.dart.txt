@@ -1,0 +1,15 @@
+import './model/sand_arg.dart';
+import 'package:flutter/material.dart';
+
+class SandSub extends StatelessWidget {
+  static const routeName = '/sub';
+  final SandArgs arg;
+  SandSub(this.arg);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('subView')),
+      body: Center(child: Text('Title: ${arg.title}, Name: ${arg.name}')),
+    );
+  }
+}

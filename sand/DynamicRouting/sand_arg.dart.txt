@@ -1,0 +1,5 @@
+class SandArgs {
+  String title;
+  String name;
+  SandArgs(this.title, this.name);
+}
