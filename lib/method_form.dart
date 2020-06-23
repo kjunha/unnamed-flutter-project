@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import './model/method.dart';
-import 'model/record.dart';
+import './model/record.dart';
 
 class MethodForm extends StatefulWidget {
   FormMode mode;
@@ -88,14 +88,23 @@ class _MethodFormState extends State<MethodForm> {
   //Button Action Handler
   void _editMethod() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method edited = Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain, widget.method.incSubtotal, widget.method.expSubTotal, widget.method.dateCreated);
-      Hive.box('methods').put(_methodName, edited);
-      if(_methodName != widget.method.name) {
+      if(_methodName == widget.method.name) { //if key is same >> update
+        Method updated = widget.method;
+        updated.description = _methodDescription;
+        updated.type = _methodType;
+        updated.colorHex = _methodColor;
+        updated.isIncluded = _isTotalAsset;
+        updated.isMain = _isOnMain;
+        Hive.box('methods').put(_methodName, updated);
+      } else { //if key is different >> create new and replace
+        Method replace = Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain, widget.method.incSubtotal, widget.method.expSubTotal, widget.method.dateCreated);
         List<dynamic> recordKeys = widget.method.recordKeys;
         for(int i = 0; i < recordKeys.length; i++) {
-          Record belong = Hive.box('records').getAt(recordKeys[i]);
-          
+          Record belonging = Hive.box('records').getAt(recordKeys[i]);
+          belonging.method = replace;
+          replace.recordKeys.add(recordKeys[i]);
         }
+        Hive.box('methods').put(_methodName, replace);
         Hive.box('methods').delete(widget.method.name);
       }
       showDialog(
@@ -200,7 +209,12 @@ class _MethodFormState extends State<MethodForm> {
                           return value.length == 0?'거래수단 이름을 입력해 주세요.':null;
                         },
                         (value) {
-                          return methodsNameList.indexOf(value) != -1?'이미 등록된 이름입니다':null;
+                          if(widget.mode == FormMode.ADD) {
+                            return methodsNameList.indexOf(value) != -1?'이미 등록된 이름입니다':null;
+                          } else {
+                            return (methodsNameList.indexOf(value) != -1 && value != widget.method.name)?'이미 등록된 이름입니다':null;
+                          }
+                          
                         }
                       ],
                       maxLines: 1,
@@ -314,7 +328,13 @@ class _MethodFormState extends State<MethodForm> {
                         //TODO Alert when amount is 0
                         //TODO Alert when txDescription == null
                         //TODO Alert when method == null
-                        onPressed: _addNewMethod
+                        onPressed: () {
+                          if(widget.mode == FormMode.ADD) {
+                            _addNewMethod();
+                          } else {
+                            _editMethod();
+                          }
+                        }
                       ),
                     )
                   ],

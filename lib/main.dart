@@ -83,6 +83,10 @@ class Overview extends StatefulWidget {
 
 class _OverviewState extends State<Overview> {
 
+  double _incSubtotal;
+  double _expSubtotal;
+  double _total;
+
   List<Record> _readRecordData(Box box) {
     List<Record> recordList = [];
     for(int i = 0; i < box.length; i++) {
@@ -98,6 +102,20 @@ class _OverviewState extends State<Overview> {
       methodList.add(box.get(key));
     }
     return methodList;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _incSubtotal = 0;
+    _expSubtotal = 0;
+    _total = 0;
+    List<Method> methods = _readMethodData(Hive.box('methods'));
+    for(Method mtd in methods) {
+      _incSubtotal += mtd.incSubtotal;
+      _expSubtotal += mtd.expSubTotal;
+    }
+    _total = _incSubtotal - _expSubtotal;
   }
 
   //Method Card builder
@@ -219,27 +237,28 @@ class _OverviewState extends State<Overview> {
                   margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
                   child: Table(
                     children: [
+                      //TODO: Box Listener for methods box should be added.
                       TableRow(
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(10000, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                              Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
                             ],
                           ),
                         ]
