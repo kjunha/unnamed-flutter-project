@@ -147,13 +147,13 @@ class _MethodListState extends State<MethodList> {
                         ),
                         FlatButton(
                           child: Text('네'),
-                          onPressed: () async {
+                          onPressed: () {
                             List<dynamic> recordKeys = currentMethod.recordKeys;
                             print('key check' + recordKeys.toString());
                             for(int i = 0; i < recordKeys.length; i++) {
                               Hive.box('records').delete(recordKeys[i]);
                             }
-                            await Hive.box('methods').delete(currentMethod.name);
+                            Hive.box('methods').delete(currentMethod.name);
                             Navigator.of(context).pop();
                           },
                         )

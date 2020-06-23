@@ -110,12 +110,19 @@ class _OverviewState extends State<Overview> {
     _incSubtotal = 0;
     _expSubtotal = 0;
     _total = 0;
+    _updateTotalAssetView();
+  }
+
+  //TODO: such state like: onReloaded
+  //update Total Asset view
+  void _updateTotalAssetView() {
     List<Method> methods = _readMethodData(Hive.box('methods'));
     for(Method mtd in methods) {
       _incSubtotal += mtd.incSubtotal;
       _expSubtotal += mtd.expSubTotal;
     }
     _total = _incSubtotal - _expSubtotal;
+
   }
 
   //Method Card builder
@@ -161,7 +168,7 @@ class _OverviewState extends State<Overview> {
 
   //Group List Group bar
   Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text(df.format(groupByValue));
+    return Text(groupByValue);
   }
 
   //List Tile UI
@@ -235,35 +242,39 @@ class _OverviewState extends State<Overview> {
                 Divider(thickness: 2,),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
-                  child: Table(
-                    children: [
-                      //TODO: Box Listener for methods box should be added.
-                      TableRow(
+                  child: ValueListenableBuilder(
+                    valueListenable: Hive.box('methods').listenable(),
+                    builder: (context, box, _) {
+                      return Table(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                              Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-                            ],
-                          ),
-                        ]
-                      )
-                    ],
+                          TableRow(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                  Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                  Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                  Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                ],
+                              ),
+                            ]
+                          )
+                        ],
+                      );
+                    },
                   ),
                 ),
               ]),
@@ -276,7 +287,7 @@ class _OverviewState extends State<Overview> {
                   elements: _readRecordData(box),
                   groupBy: (element) {
                     final record = element as Record;
-                    return record.date;
+                    return df.format(record.date);
                   },
                   groupSeparatorBuilder: _buildGroupSeparator,
                   itemBuilder: _buildRecordList,
