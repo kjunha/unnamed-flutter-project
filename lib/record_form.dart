@@ -103,12 +103,15 @@ class _RecordFormState extends State<RecordForm> {
   //on pressed for edited record
   void _editRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method _dummyMtd = Method(_txMethod, '', 'credit', 0xffffff, true, true,0,0);
-      Record record = _segctrSelection == 1?
-      new Record(_dateInput, _txDescription, _amount, _dummyMtd, ''):
-      new Record(_dateInput, _txDescription, _amount*_segctrSelection, _dummyMtd, _txTag??'');
-      //print('recordInfo: ' + record.toString());
-      Hive.box('records').putAt(_boxKey, record);
+      Method method = Hive.box('methods').get(_txMethod);
+      Record origRecord = Hive.box('records').getAt(_boxKey);
+      if(_segctrSelection == 1) {
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, method, ''));
+        method.incSubtotal += (_amount - origRecord.amount);
+      } else {
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
+        method.expSubTotal += (_amount - origRecord.amount);
+      }
       showDialog(
         context: context,
         builder: (context) {

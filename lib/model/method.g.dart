@@ -25,13 +25,14 @@ class MethodAdapter extends TypeAdapter<Method> {
       fields[6] as bool,
       fields[7] as double,
       fields[8] as double,
+      fields[9] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, Method obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
@@ -47,6 +48,8 @@ class MethodAdapter extends TypeAdapter<Method> {
       ..writeByte(7)
       ..write(obj.incSubtotal)
       ..writeByte(8)
-      ..write(obj.expSubTotal);
+      ..write(obj.expSubTotal)
+      ..writeByte(9)
+      ..write(obj.dateCreated);
   }
 }

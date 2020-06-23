@@ -19,6 +19,8 @@ class Method {
   double incSubtotal; //Subtotal for income
   @HiveField(8)
   double expSubTotal; //Subtotal for expenditure
+  @HiveField(9)
+  DateTime dateCreated;
   
-  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain, this.incSubtotal, this.expSubTotal);
+  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain, this.incSubtotal, this.expSubTotal, this.dateCreated);
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import './drawer_common.dart';
+import './source_common.dart';
+import './model/method.dart';
 
 class MethodList extends StatefulWidget {
   @override
@@ -16,11 +19,22 @@ class _MethodListState extends State<MethodList> {
     3:Text('현금예산'),
     4:Text('포인트'),
   };
-  var _segctrSelection = 0;
 
-  //Dummy Field
-  var _dummy = [Colors.green, Colors.red, Colors.blue, Colors.black];
+  //state fields
+  List<Method> methodList;
+  var _segctrSelection;
 
+  @override
+  void initState() {
+    super.initState();
+    methodList = [];
+    _segctrSelection = 0;
+    Box box = Hive.box('methods');
+    List<dynamic> keys = box.keys.toList();
+    for (dynamic key in keys) {
+      methodList.add(box.get(key));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +68,7 @@ class _MethodListState extends State<MethodList> {
             ],
           ),),
           Flexible(child: ListView.builder(
-            itemCount: _dummy.length,
+            itemCount: methodList.length,
             itemBuilder: _buildPointWallet,
           ),)
         ],
@@ -66,16 +80,19 @@ class _MethodListState extends State<MethodList> {
   Widget _buildPointWallet(BuildContext context, int i) {
     return Card(child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
       Container(width:280, child: Card(
-        color: _dummy[i],
+        color: Color(methodList[i].colorHex),
         margin: EdgeInsets.symmetric(vertical: 10,horizontal:10),
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text('네이버 페이 포인트', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
-              subtitle: Text('메모할 내용', style: TextStyle(color: Colors.grey[200]),), 
+              title: Text(methodList[i].name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+              subtitle: Text(methodList[i].description, style: TextStyle(color: Colors.grey[200]),), 
             ),
             SizedBox(height: 10,),
-            Center(child: Text('1,234,567 P', style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
+            Center(child: Text(
+              buildCurrencyString(getMethodTotal(methodList[i]), methodList[i].type == 'point'), 
+              style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),
+            ),),
             SizedBox(height: 60,),
           ],
         ),
@@ -87,9 +104,9 @@ class _MethodListState extends State<MethodList> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Text('거래수단 종류:',style: TextStyle(fontWeight: FontWeight.bold),), 
-            Center(child:Text('포인트')),
+            Center(child:Text(methodList[i].type)),
             Text('생성일자:',style: TextStyle(fontWeight: FontWeight.bold),), 
-            Center(child:Text('2020/06/01')),
+            Center(child:Text(df.format(methodList[i].dateCreated))),
             ButtonTheme(
               child: RaisedButton(
                 child: Text('수정'),

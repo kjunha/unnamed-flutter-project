@@ -54,6 +54,12 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
             builder: (_) => RecordForm.edit(valueSet.record, valueSet.key)
           );
         }
+        if(setting.name == '/methods/edit') {
+          final Method valueSet = setting.arguments;
+          return MaterialPageRoute(
+            builder: (_) => MethodForm.edit(valueSet)
+          );
+        }
         return MaterialPageRoute(builder: (_) => Scaffold(
           body: Center(child: Text('no routes detected'),),
         ),);

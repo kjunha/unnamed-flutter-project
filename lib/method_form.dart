@@ -1,9 +1,19 @@
+import 'package:finance_point/form_mode_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import './model/method.dart';
 
 class MethodForm extends StatefulWidget {
+  FormMode mode;
+  Method method;
+  MethodForm() {
+    mode = FormMode.ADD;
+  }
+  MethodForm.edit(this.method) {
+    mode = FormMode.EDIT;
+  }
+
   @override
   _MethodFormState createState() => _MethodFormState();
 }
@@ -27,7 +37,7 @@ class _MethodFormState extends State<MethodForm> {
   void _addNewMethod() {
     if(_formKey.currentState.saveAndValidate()) {
       methodsNameList.add(_methodName);
-      Hive.box('methods').put(_methodName ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0));
+      Hive.box('methods').put(_methodName ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0,DateTime.now()));
       showDialog(
         context: context,
         builder: (context) {
