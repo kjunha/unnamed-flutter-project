@@ -175,7 +175,7 @@ class _RecordListState extends State<RecordList> {
           valueListenable: Hive.box('records').listenable(),
           builder: (context, box, _) {
             if(box.values.isEmpty) {
-              return Center(child: Text('Nothing to show'),);
+              return Center(child: Text('여기에 수입 및 지출기록이 보여집니다.'),);
             }
             return Flexible(child: GroupedListView(
               elements: _readBoxData(box),

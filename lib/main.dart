@@ -135,6 +135,9 @@ class _OverviewState extends State<Overview> {
         );
       }
     }
+    if(_walletStack.length == 1) {
+      _walletStack.add(Center(child: Text('보유한 거래수단이 없습니다.'),));
+    }
     return _walletStack;
   }
 
@@ -193,7 +196,7 @@ class _OverviewState extends State<Overview> {
             Card(
               child: ValueListenableBuilder(
                 valueListenable: Hive.box('methods').listenable(),
-                builder: (context, _, __) {
+                builder: (context, box, _) {
                   return ExpansionTile(
                     title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
                     initiallyExpanded: true,
@@ -249,7 +252,7 @@ class _OverviewState extends State<Overview> {
             ValueListenableBuilder(
               valueListenable: Hive.box('records').listenable(),
               builder: (context, box, _) {
-                if(box.values.isEmpty) return Center(child: Text('nothing to show'));
+                if(box.values.isEmpty) return Center(child: Text('수입 및 지출기록이 없습니다.'));
                 return Flexible(child: GroupedListView(
                   elements: _readRecordData(box),
                   groupBy: (element) {

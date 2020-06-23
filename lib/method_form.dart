@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import './model/method.dart';
+import 'model/record.dart';
 
 class MethodForm extends StatefulWidget {
   FormMode mode;
@@ -33,6 +34,28 @@ class _MethodFormState extends State<MethodForm> {
   //Dummydata field -DEV
   var _colorSet = [0xff0000, 0x00ff00, 0x0000ff];
 
+  @override
+  void initState() {
+    super.initState();
+    Box box = Hive.box('methods');
+    List<dynamic> keys = box.keys.toList();
+    for(dynamic key in keys) {
+      Method mtd = box.get(key);
+      methodsNameList.add(mtd.name);
+    }
+    if(widget.mode == FormMode.ADD) {
+      _isTotalAsset = true;
+      _isOnMain = true;
+    } else {
+      _methodName = widget.method.name;
+      _methodDescription = widget.method.description;
+      _methodType = widget.method.type;
+      _methodColor = widget.method.colorHex;
+      _isTotalAsset = widget.method.isIncluded;
+      _isOnMain = widget.method.isMain;
+    }
+  }
+  
   //Button Action Handler
   void _addNewMethod() {
     if(_formKey.currentState.saveAndValidate()) {
@@ -44,6 +67,43 @@ class _MethodFormState extends State<MethodForm> {
           return AlertDialog(
             title: Text('입력 완료'),
             content: Text('새로운 거래수단이 추가되었습니다.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('확인'),
+                onPressed: () {
+                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
+                },
+              )
+            ]
+          );
+        }
+      );
+    } else {
+      //DEBUG
+      print("validation 실패");
+    }
+  }
+
+  //Button Action Handler
+  void _editMethod() {
+    if(_formKey.currentState.saveAndValidate()) {
+      Method edited = Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain, widget.method.incSubtotal, widget.method.expSubTotal, widget.method.dateCreated);
+      Hive.box('methods').put(_methodName, edited);
+      if(_methodName != widget.method.name) {
+        List<dynamic> recordKeys = widget.method.recordKeys;
+        for(int i = 0; i < recordKeys.length; i++) {
+          Record belong = Hive.box('records').getAt(recordKeys[i]);
+          
+        }
+        Hive.box('methods').delete(widget.method.name);
+      }
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('입력 완료'),
+            content: Text('거래수단의 정보가 갱신되었습니다.'),
             actions: <Widget>[
               FlatButton(
                 child: Text('확인'),
@@ -83,20 +143,47 @@ class _MethodFormState extends State<MethodForm> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    Box box = Hive.box('methods');
-    List<dynamic> keys = box.keys.toList();
-    for(dynamic key in keys) {
-      Method mtd = box.get(key);
-      methodsNameList.add(mtd.name);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('새로운 거래수단 추가하기'), backgroundColor: Colors.blue,),
+      appBar: AppBar(
+        title: Text('새로운 거래수단 추가하기'), 
+        backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            bool _isPopForm = true;
+            if(_methodName != null || _methodDescription != null || _methodType != null || _methodColor != null) {
+              print('DEBUG: Show me a dialog');
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('경고'),
+                    content: Text('변경사항을 저장하지 않고 닫으시겠습니까?'),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('아니오'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('네'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
+                  );
+                }
+              );
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ),
       body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
           child: Column(
@@ -107,6 +194,7 @@ class _MethodFormState extends State<MethodForm> {
                   children: [
                     FormBuilderTextField(
                       attribute: 'method_name',
+                      initialValue: _methodName??'',
                       validators: [
                         (value) { 
                           return value.length == 0?'거래수단 이름을 입력해 주세요.':null;
@@ -128,6 +216,7 @@ class _MethodFormState extends State<MethodForm> {
                     //Description is optional
                     FormBuilderTextField(
                       attribute: 'method_description',
+                      initialValue: _methodDescription??'',
                       maxLines: 1,
                       decoration: InputDecoration(
                         labelText: '거래수단 설명',
@@ -150,6 +239,7 @@ class _MethodFormState extends State<MethodForm> {
                         border: InputBorder.none
                       ),
                       attribute: "method_type",
+                      initialValue: _methodType,
                       options: [
                         FormBuilderFieldOption(
                           child: Text("신용카드"),
@@ -185,6 +275,7 @@ class _MethodFormState extends State<MethodForm> {
                         (value) { return value == null?'선택하지 않으실 경우 기본색은 회색으로 지정됩니다.':null;}
                       ],
                       options: _randerColorOption(),
+                      //initialValue: widget.method.colorHex??0x333333,
                       onChanged: (value) {
                         if(value != null) {
                           _methodColor = value;
@@ -217,7 +308,7 @@ class _MethodFormState extends State<MethodForm> {
                       minWidth: double.infinity,
                       height: 50,
                       child: RaisedButton(
-                        child: Text('거래수단 추가', style: TextStyle(color: Colors.white, fontSize: 16),),
+                        child: Text(widget.mode == FormMode.ADD?'신규 거래수단 추가':'거래수단 정보 변경', style: TextStyle(color: Colors.white, fontSize: 16),),
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                         //TODO Alert when amount is 0

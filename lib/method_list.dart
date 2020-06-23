@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import './drawer_common.dart';
 import './source_common.dart';
@@ -67,10 +68,19 @@ class _MethodListState extends State<MethodList> {
               ),
             ],
           ),),
-          Flexible(child: ListView.builder(
-            itemCount: methodList.length,
-            itemBuilder: _buildPointWallet,
-          ),)
+          
+          ValueListenableBuilder(
+            valueListenable: Hive.box('methods').listenable(),
+            builder: (context, box,  _) {
+              if(box.values.isEmpty) {
+                return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
+              }
+              return Flexible(child: ListView.builder(
+                itemCount: methodList.length,
+                itemBuilder: _buildPointWallet,
+              ),);
+            }
+          )
         ],
       ),
     );
@@ -78,19 +88,20 @@ class _MethodListState extends State<MethodList> {
 
 
   Widget _buildPointWallet(BuildContext context, int i) {
+    Method currentMethod = methodList[i];
     return Card(child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
       Container(width:280, child: Card(
-        color: Color(methodList[i].colorHex),
+        color: Color(currentMethod.colorHex),
         margin: EdgeInsets.symmetric(vertical: 10,horizontal:10),
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text(methodList[i].name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
-              subtitle: Text(methodList[i].description, style: TextStyle(color: Colors.grey[200]),), 
+              title: Text(currentMethod.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+              subtitle: Text(currentMethod.description, style: TextStyle(color: Colors.grey[200]),), 
             ),
             SizedBox(height: 10,),
             Center(child: Text(
-              buildCurrencyString(getMethodTotal(methodList[i]), methodList[i].type == 'point'), 
+              buildCurrencyString(getMethodTotal(currentMethod), currentMethod.type == 'point'), 
               style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),
             ),),
             SizedBox(height: 60,),
@@ -104,14 +115,16 @@ class _MethodListState extends State<MethodList> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Text('거래수단 종류:',style: TextStyle(fontWeight: FontWeight.bold),), 
-            Center(child:Text(methodList[i].type)),
+            Center(child:Text(currentMethod.type)),
             Text('생성일자:',style: TextStyle(fontWeight: FontWeight.bold),), 
-            Center(child:Text(df.format(methodList[i].dateCreated))),
+            Center(child:Text(df.format(currentMethod.dateCreated))),
             ButtonTheme(
               child: RaisedButton(
                 child: Text('수정'),
                 color: Colors.blue,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/methods/edit', arguments: currentMethod);
+                },
               ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             ),
@@ -119,7 +132,34 @@ class _MethodListState extends State<MethodList> {
               child: RaisedButton(
                 child: Text('삭제'),
                 color: Colors.red,
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    child: AlertDialog(
+                      content: Text('거래수단과 함께 등록된 수입 및 지출내역도 모두 삭제됩니다. 정말로 삭제하시겠습니까?'),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text('아니오'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('네'),
+                          onPressed: () async {
+                            List<dynamic> recordKeys = currentMethod.recordKeys;
+                            for(int i = 0; i < recordKeys.length; i++) {
+                              Hive.box('records').deleteAt(i);
+                            }
+                            await Hive.box('methods').delete(currentMethod.name);
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ],
+                    )
+                  );
+                },
               ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             ),

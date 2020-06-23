@@ -21,6 +21,10 @@ class Method {
   double expSubTotal; //Subtotal for expenditure
   @HiveField(9)
   DateTime dateCreated;
+  @HiveField(10)
+  List<int> recordKeys;
   
-  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain, this.incSubtotal, this.expSubTotal, this.dateCreated);
+  Method(this.name, this.description, this.type, this.colorHex, this.isIncluded, this.isMain, this.incSubtotal, this.expSubTotal, this.dateCreated) {
+    this.recordKeys = [];
+  }
 }

@@ -26,13 +26,13 @@ class MethodAdapter extends TypeAdapter<Method> {
       fields[7] as double,
       fields[8] as double,
       fields[9] as DateTime,
-    );
+    )..recordKeys = (fields[10] as List)?.cast<int>();
   }
 
   @override
   void write(BinaryWriter writer, Method obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
@@ -50,6 +50,8 @@ class MethodAdapter extends TypeAdapter<Method> {
       ..writeByte(8)
       ..write(obj.expSubTotal)
       ..writeByte(9)
-      ..write(obj.dateCreated);
+      ..write(obj.dateCreated)
+      ..writeByte(10)
+      ..write(obj.recordKeys);
   }
 }

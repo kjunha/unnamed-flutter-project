@@ -71,13 +71,15 @@ class _RecordFormState extends State<RecordForm> {
   void _addNewRecord() {
     if(_formKey.currentState.saveAndValidate()) {
       Method method = Hive.box('methods').get(_txMethod);
+      Box recordBox = Hive.box('records');
       if(_segctrSelection == 1) {
-        Hive.box('records').add(Record(_dateInput, _txDescription, _amount, method, ''));
+        recordBox.add(Record(_dateInput, _txDescription, _amount, method, ''));
         method.incSubtotal += _amount;
       } else {
-        Hive.box('records').add(Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
+        recordBox.add(Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
         method.expSubTotal += _amount;
       }
+      method.recordKeys.add(recordBox.keys.toList()[recordBox.length-1]);
       Hive.box('methods').put(_txMethod,method);
       showDialog(
         context: context,
