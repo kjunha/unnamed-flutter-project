@@ -34,7 +34,7 @@ BottomNavigationBar loadBottomNavigator(BuildContext context) {
       } else if(index == 2) {
         Navigator.pushNamed(context, '/methods');
       } else if(index == 3) {
-        Navigator.pushNamed(context, '/sand');
+        //Navigator.pushNamed(context, '/sand');
       }
     },
   );
