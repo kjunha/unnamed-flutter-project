@@ -122,12 +122,12 @@ class _OverviewState extends State<Overview> {
             child: Column(
               children: <Widget>[
                 ListTile(
-                  title: Text(method.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
-                  subtitle: Text(method.description, style: TextStyle(color: Colors.grey[200]),), 
-                  trailing: IconButton(
-                    icon: Icon(Icons.settings),
-                    onPressed: () {},
-                  ),
+                  title: Text(method.name??'', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+                  subtitle: Text(method.description??'', style: TextStyle(color: Colors.grey[200]),), 
+                  // trailing: IconButton(
+                  //   icon: Icon(Icons.settings),
+                  //   onPressed: () {},
+                  // ),
                 ),
                 SizedBox(height: 5,),
                 Center(child: Text(buildCurrencyString(getMethodTotal(method), method.type == 'point'), style: TextStyle(fontSize: 23, color: Colors.white, fontWeight: FontWeight.bold),),),
@@ -179,9 +179,6 @@ class _OverviewState extends State<Overview> {
       appBar: AppBar(
         title: Text('Overview'),
         centerTitle: true,
-        actions: [
-          IconButton(icon: Icon(Icons.build),onPressed: () {Navigator.pushNamed(context, '/sand');},)
-        ],
       ),
       bottomNavigationBar: loadBottomNavigator(context),
       body: SingleChildScrollView(

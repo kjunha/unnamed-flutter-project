@@ -27,6 +27,7 @@ class _RecordFormState extends State<RecordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
   final _txAmountController = TextEditingController();
   final _txDescController = TextEditingController();
+  final _txTagController = TextEditingController();
   final Map<int, Widget> _children = {
     -1:Text('지출 내역'),
     1:Text('수입 내역')
@@ -154,6 +155,7 @@ class _RecordFormState extends State<RecordForm> {
   void _clearTextInput() {
     _txDescController.clear();
     _txAmountController.clear();
+    _txTagController.clear();
   }
 
   //Dynamic Element by Segment Control
@@ -187,6 +189,8 @@ class _RecordFormState extends State<RecordForm> {
             SizedBox(height: 18,),
             FormBuilderTypeAhead(
               attribute: "transaction_tag",
+              initialValue: widget.mode == FormMode.ADD?null:_txTag,
+              controller: widget.mode == FormMode.ADD?_txTagController:null,
               decoration: InputDecoration(
                 labelText: '태그',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
@@ -209,6 +213,7 @@ class _RecordFormState extends State<RecordForm> {
               noItemsFoundBuilder: (context) {
                 return ListTile(
                   title: Text('위 이름으로 새로운 태그를 지정합니다.')
+                  
                 );
               },
               onChanged: (value) {setState(() {

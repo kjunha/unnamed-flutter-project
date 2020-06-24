@@ -89,8 +89,8 @@ class _MethodListState extends State<MethodList> {
         child: Column(
           children: <Widget>[
             ListTile(
-              title: Text(currentMethod.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
-              subtitle: Text(currentMethod.description, style: TextStyle(color: Colors.grey[200]),), 
+              title: Text(currentMethod.name??'', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),), 
+              subtitle: Text(currentMethod.description??'', style: TextStyle(color: Colors.grey[200]),), 
             ),
             SizedBox(height: 10,),
             Center(child: Text(
@@ -113,8 +113,8 @@ class _MethodListState extends State<MethodList> {
             Center(child:Text(df.format(currentMethod.dateCreated))),
             ButtonTheme(
               child: RaisedButton(
-                child: Text('수정'),
-                color: Colors.blue,
+                child: Text('수정', style: TextStyle(color: Colors.white),),
+                color: Colors.grey,
                 onPressed: () {
                   Navigator.pushNamed(context, '/methods/edit', arguments: currentMethod);
                 },
@@ -123,7 +123,7 @@ class _MethodListState extends State<MethodList> {
             ),
             ButtonTheme(
               child: RaisedButton(
-                child: Text('삭제'),
+                child: Text('삭제', style: TextStyle(color: Colors.white),),
                 color: Colors.red,
                 onPressed: () {
                   showDialog(

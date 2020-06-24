@@ -35,7 +35,7 @@ class _MethodFormState extends State<MethodForm> {
   bool _isOnMain = true;
 
   //Dummydata field -DEV
-  var _colorSet = [0xffff0000, 0xff00ff00, 0xff0000ff];
+  var _colorSet = [0xfff32728, 0xfff8c700, 0xff1ec200, 0xff0e2166, 0xff524e43];
 
   @override
   void initState() {
