@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
-import './drawer_common.dart';
+import './bottom_nav_common.dart';
 import './source_common.dart';
 import './model/method.dart';
 
@@ -35,7 +35,7 @@ class _MethodListState extends State<MethodList> {
     return Scaffold(
       appBar: AppBar(title: Text('거래수단 관리'),  backgroundColor: Colors.blue,),
       backgroundColor: Colors.grey[300],
-      drawer: loadDrawer(context),
+      bottomNavigationBar: loadBottomNavigator(context),
       body: Column(
         children: <Widget>[
           Card(child:Column(

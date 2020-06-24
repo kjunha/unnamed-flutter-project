@@ -6,7 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import './model/record.dart';
 import './source_common.dart';
-import './drawer_common.dart';
+import './bottom_nav_common.dart';
 
 class RecordList extends StatefulWidget {
   @override
@@ -128,7 +128,7 @@ class _RecordListState extends State<RecordList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('수입 및 지출내역 편집'),  backgroundColor: Colors.blue,),
-      drawer: loadDrawer(context),
+      bottomNavigationBar: loadBottomNavigator(context),
       body: Column(children: <Widget>[
         Card(child: Container(margin:EdgeInsets.symmetric(vertical:16, horizontal:16),child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

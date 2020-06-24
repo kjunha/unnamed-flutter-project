@@ -32,7 +32,8 @@ class _RecordFormState extends State<RecordForm> {
     1:Text('수입 내역')
   };
   List<String> _methodNameList = [];
-  
+  List<String> _tagList = [];
+
   //State variable
   int _segctrSelection;
   DateTime _dateInput;
@@ -46,10 +47,23 @@ class _RecordFormState extends State<RecordForm> {
   @override
   void initState() {
     super.initState();
-    Box box = Hive.box('methods');
-    List<dynamic> keys = box.keys.toList();
+    Box methodsbox = Hive.box('methods');
+    Box tagsBox = Hive.box('tags');
+    //initialize tag box
+    if(tagsBox.length == 0) {
+      tagsBox.add('쇼핑');
+      tagsBox.add('취미');
+      tagsBox.add('생활');
+      tagsBox.add('통신');
+      tagsBox.add('교통');
+      tagsBox.add('병원');
+    }
+    for(int i = 0; i < tagsBox.length; i++) {
+      _tagList.add(tagsBox.getAt(i));
+    }
+    List<dynamic> keys = methodsbox.keys.toList();
     for(dynamic key in keys) {
-      _methodNameList.add(key);
+      _methodNameList.add(methodsbox.get(key).name);
     }
     if(widget.mode == FormMode.ADD) {
       _segctrSelection = -1;
@@ -65,14 +79,11 @@ class _RecordFormState extends State<RecordForm> {
     }
   }
 
-  //Dummydata field - DEV
-  var _dummyCategory = ['c1', 'c2', 'c3'];
-
   //Button Action Handler
   //on pressed for new record
   void _addNewRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method method = Hive.box('methods').get(_txMethod);
+      Method method = Hive.box('methods').get(toKey(_txMethod));
       Box recordBox = Hive.box('records');
       if(_segctrSelection == 1) {
         recordBox.add(Record(_dateInput, _txDescription, _amount, method, ''));
@@ -82,7 +93,7 @@ class _RecordFormState extends State<RecordForm> {
         method.expSubTotal += _amount;
       }
       method.recordKeys.add(recordBox.keys.toList()[recordBox.length-1]);
-      Hive.box('methods').put(_txMethod,method);
+      Hive.box('methods').put(toKey(_txMethod),method);
       showDialog(
         context: context,
         builder: (context) {
@@ -108,7 +119,7 @@ class _RecordFormState extends State<RecordForm> {
   //on pressed for edited record
   void _editRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method method = Hive.box('methods').get(_txMethod);
+      Method method = Hive.box('methods').get(toKey(_txMethod));
       Record origRecord = Hive.box('records').getAt(_boxKey);
       if(_segctrSelection == 1) {
         Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, method, ''));
@@ -176,31 +187,13 @@ class _RecordFormState extends State<RecordForm> {
             SizedBox(height: 18,),
             FormBuilderTypeAhead(
               attribute: "transaction_tag",
-              validators: [
-                (value) {
-                  if(value == null) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('테그가 입력되지 않았습니다.'),
-                          content: Column(children: [
-                            Text('새로 추가하는 수입 및 지출내역에 테그가 입력되지 않았습니다.')
-                          ],),
-                          actions: [],
-                        );
-                      });
-                  }
-                  return '';
-                }
-              ],
               decoration: InputDecoration(
                 labelText: '테그',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
               ),
               suggestionsCallback: (pattern) async {
                 List<String> sorted = [];
-                for(String item in _dummyCategory) {
+                for(String item in _tagList) {
                   if(item.contains(pattern)) {
                     sorted.add(item);
                   }
@@ -215,12 +208,18 @@ class _RecordFormState extends State<RecordForm> {
 
               noItemsFoundBuilder: (context) {
                 return ListTile(
-                  title: Text('add new item')
+                  title: Text('위 이름으로 새로운 테그를 지정합니다.')
                 );
               },
               onChanged: (value) {setState(() {
-                _txTag = value;
+                _txTag = value??'';
               });},
+              onSaved: (value) {
+                setState(() {
+                  _tagList.add(value);
+                  Hive.box('tags').add(value);
+                });
+              },
             ),
           ],
         ),

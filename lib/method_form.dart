@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import './model/method.dart';
 import './model/record.dart';
+import './source_common.dart';
 
 class MethodForm extends StatefulWidget {
   FormMode mode;
@@ -34,7 +35,7 @@ class _MethodFormState extends State<MethodForm> {
   bool _isOnMain = true;
 
   //Dummydata field -DEV
-  var _colorSet = [0xff0000, 0x00ff00, 0x0000ff];
+  var _colorSet = [0xffff0000, 0xff00ff00, 0xff0000ff];
 
   @override
   void initState() {
@@ -62,7 +63,7 @@ class _MethodFormState extends State<MethodForm> {
   void _addNewMethod() {
     if(_formKey.currentState.saveAndValidate()) {
       methodsNameList.add(_methodName);
-      Hive.box('methods').put(_methodName ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0,DateTime.now()));
+      Hive.box('methods').put(toKey(_methodName) ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0,DateTime.now()));
       showDialog(
         context: context,
         builder: (context) {
@@ -98,7 +99,7 @@ class _MethodFormState extends State<MethodForm> {
         updated.colorHex = _methodColor;
         updated.isIncluded = _isTotalAsset;
         updated.isMain = _isOnMain;
-        Hive.box('methods').put(_methodName, updated);
+        Hive.box('methods').put(toKey(_methodName), updated);
       } else { //if key is different >> create new and replace
         Method replace = Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain, widget.method.incSubtotal, widget.method.expSubTotal, widget.method.dateCreated);
         List<dynamic> recordKeys = widget.method.recordKeys.toList();
@@ -109,8 +110,8 @@ class _MethodFormState extends State<MethodForm> {
           recordsBox.put(recordKeys[i], belonging);
           replace.recordKeys.add(recordKeys[i]);
         }
-        Hive.box('methods').put(_methodName, replace);
-        Hive.box('methods').delete(widget.method.name);
+        Hive.box('methods').put(toKey(_methodName), replace);
+        Hive.box('methods').delete(toKey(widget.method.name));
       }
       showDialog(
         context: context,

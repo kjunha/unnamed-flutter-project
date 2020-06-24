@@ -11,7 +11,7 @@ import './model/method.dart';
 //router
 import './record_form.dart';
 import './method_form.dart';
-import './drawer_common.dart';
+import './bottom_nav_common.dart';
 import './record_list.dart';
 import './method_list.dart';
 
@@ -23,6 +23,7 @@ main() async {
   Hive.registerAdapter(MethodAdapter());
   await Hive.openBox('records');
   await Hive.openBox('methods');
+  await Hive.openBox('tags');
   runApp(ExtraCreditApp());
 }
 //Sandbox
@@ -82,11 +83,6 @@ class Overview extends StatefulWidget {
 }
 
 class _OverviewState extends State<Overview> {
-
-  double _incSubtotal;
-  double _expSubtotal;
-  double _total;
-
   List<Record> _readRecordData(Box box) {
     List<Record> recordList = [];
     for(int i = 0; i < box.length; i++) {
@@ -100,30 +96,13 @@ class _OverviewState extends State<Overview> {
     List<dynamic> keys = box.keys.toList();
     for(dynamic key in keys) {
       methodList.add(box.get(key));
+      print(key);
     }
     return methodList;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _incSubtotal = 0;
-    _expSubtotal = 0;
-    _total = 0;
-    _updateTotalAssetView();
-  }
-
   //TODO: such state like: onReloaded
   //update Total Asset view
-  void _updateTotalAssetView() {
-    List<Method> methods = _readMethodData(Hive.box('methods'));
-    for(Method mtd in methods) {
-      _incSubtotal += mtd.incSubtotal;
-      _expSubtotal += mtd.expSubTotal;
-    }
-    _total = _incSubtotal - _expSubtotal;
-
-  }
 
   //Method Card builder
   List<Widget> _buildPointWallet(BuildContext context) {
@@ -163,6 +142,7 @@ class _OverviewState extends State<Overview> {
     if(_walletStack.length == 1) {
       _walletStack.add(Center(child: Text('보유한 거래수단이 없습니다.'),));
     }
+    _walletStack.add(SizedBox(height: 30,));
     return _walletStack;
   }
 
@@ -183,19 +163,13 @@ class _OverviewState extends State<Overview> {
       child: ListTile(
         title:Text(record.description,),
         subtitle: Text(record.method.name),
-        leading: Container(
-          child: Center(child: Text(record.tag, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
-          width: 48,
-          height: 22,
-          decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
-        ),
+        leading: tagUIProvider(record.tag, Color(record.method.colorHex), record.amount>=0),
         trailing: Text(
           buildCurrencyString(record.amount, false), 
           style: TextStyle(
             color: record.amount>0?positiveTextColor:negativeTextColor, 
             fontWeight: FontWeight.bold, fontSize: 18
           ),),
-        onTap: () {},
       ),
     );
   }
@@ -211,7 +185,7 @@ class _OverviewState extends State<Overview> {
           IconButton(icon: Icon(Icons.build),onPressed: () {Navigator.pushNamed(context, '/sand');},)
         ],
       ),
-      drawer: loadDrawer(context),
+      bottomNavigationBar: loadBottomNavigator(context),
       body: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -245,6 +219,15 @@ class _OverviewState extends State<Overview> {
                   child: ValueListenableBuilder(
                     valueListenable: Hive.box('methods').listenable(),
                     builder: (context, box, _) {
+                      List<dynamic> methodKeys = box.keys.toList();
+                      double _incSubtotal = 0;
+                      double _expSubtotal = 0;
+                      for(dynamic key in methodKeys) {
+                        Method mtd = box.get(key) as Method;
+                        _incSubtotal += mtd.incSubtotal;
+                        _expSubtotal += mtd.expSubTotal;
+                      }
+                      double _total = _incSubtotal - _expSubtotal;
                       return Table(
                         children: [
                           TableRow(
@@ -253,21 +236,21 @@ class _OverviewState extends State<Overview> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
                                   Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                  Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                                 ],
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
                                   Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                  Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                                 ],
                               ),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
                                   Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
+                                  Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                                 ],
                               ),
                             ]
@@ -335,6 +318,22 @@ class _SandboxState extends State<Sandbox> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange, actions: [IconButton(icon: Icon(Icons.add), onPressed: () {},)],),
+        bottomNavigationBar: BottomNavigationBar (
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: SizedBox(height: 0,)
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: SizedBox(height: 0,)
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: SizedBox(height: 0,)
+            ),
+          ],
+        ),
         body:Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
