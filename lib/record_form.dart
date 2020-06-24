@@ -25,6 +25,8 @@ class RecordForm extends StatefulWidget {
 
 class _RecordFormState extends State<RecordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _txAmountController = TextEditingController();
+  final _txDescController = TextEditingController();
   final Map<int, Widget> _children = {
     -1:Text('지출 내역'),
     1:Text('수입 내역')
@@ -32,12 +34,12 @@ class _RecordFormState extends State<RecordForm> {
   List<String> _methodNameList = [];
   
   //State variable
-  var _segctrSelection;
-  var _dateInput;
-  var _txDescription;
-  var _amount;
-  var _txMethod;
-  var _txTag;
+  int _segctrSelection;
+  DateTime _dateInput;
+  String _txDescription;
+  double _amount;
+  String _txMethod;
+  String _txTag;
   var _boxKey;
 
 
@@ -92,6 +94,7 @@ class _RecordFormState extends State<RecordForm> {
                 child: Text('확인'),
                 onPressed: () {
                   _formKey.currentState.reset();
+                  _clearTextInput();
                   Navigator.of(context).pop();
                 },
               )
@@ -114,6 +117,7 @@ class _RecordFormState extends State<RecordForm> {
         Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
         method.expSubTotal += (_amount - origRecord.amount);
       }
+      _formKey.currentState.reset();
       showDialog(
         context: context,
         builder: (context) {
@@ -124,7 +128,7 @@ class _RecordFormState extends State<RecordForm> {
               FlatButton(
                 child: Text('확인'),
                 onPressed: () {
-                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
               )
@@ -133,6 +137,12 @@ class _RecordFormState extends State<RecordForm> {
         }
       );
     }
+  }
+
+  //clear all inputs
+  void _clearTextInput() {
+    _txDescController.clear();
+    _txAmountController.clear();
   }
 
   //Dynamic Element by Segment Control
@@ -229,7 +239,44 @@ class _RecordFormState extends State<RecordForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('수입 및 지출내역 추가'),backgroundColor: Colors.blue,),
+        appBar: AppBar(
+          title: Text('수입 및 지출내역 추가'),
+          backgroundColor: Colors.blue,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              if(widget.mode == FormMode.ADD) {
+                Navigator.of(context).pop();
+              } else {
+                if(widget.record.description != _txDescription || widget.record.amount != _amount) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('아니오'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          FlatButton(
+                            child: Text('네'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
+                  );
+                }
+              }
+            },
+          ),
+        ),
         body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
           child: Column(
@@ -276,7 +323,8 @@ class _RecordFormState extends State<RecordForm> {
                       attribute: "tx_description",
                       validators: [(value) { return value.length == 0? "거래내역은 필수항목 입니다.":null;}],
                       maxLines: 1,
-                      initialValue: _txDescription,
+                      initialValue: widget.mode == FormMode.ADD?null:_txDescription,
+                      controller: widget.mode == FormMode.ADD?_txDescController:null,
                       decoration: InputDecoration(
                         labelText: '거래내역',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
@@ -289,60 +337,46 @@ class _RecordFormState extends State<RecordForm> {
                     FormBuilderTextField(
                       attribute: "amount",
                       validators: [
-                        (value) { return value.length == 0? "금액은 필수항목 입니다.":null;},
-                        (value) {
-                          return double.parse(value) == null ? "숫자값을 입력해 주세요":null;
-                        }
+                        (value) {return value.length == 0? "금액은 필수항목 입니다.":null;},
+                        (value) {return double.tryParse(value) == null ? "숫자값을 입력해 주세요":null;}
                       ],
                       maxLines: 1,
-                      initialValue: _amount==null?'':_amount.toString(),
+                      initialValue: widget.mode == FormMode.ADD?null:nf.format(_amount),
+                      controller: widget.mode == FormMode.ADD?_txAmountController:null,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: '금액',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                       ),
-                      onChanged: (value) {setState(() {
-                        _amount = double.parse(value);
-                      });},
+                      onChanged: (value) {
+                        if(value.length > 0) {
+                          setState(() {
+                            _amount = double.parse(value);
+                          });
+                        }
+                      },
                     ),
                     SizedBox(height: 18,),
                     _selectRecordType(),
                     SizedBox(height: 25,),
-                    widget.mode == FormMode.ADD?ButtonTheme(
+                    ButtonTheme(
                       minWidth: double.infinity,
                       height: 50,
                       child: RaisedButton(
-                        child: Text('기록 추가', style: TextStyle(color: Colors.white, fontSize: 16),),
+                        child: Text(widget.mode == FormMode.ADD?'기록 추가':'기록 변경', style: TextStyle(color: Colors.white, fontSize: 16),),
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        onPressed: _addNewRecord
+                        //onPressed: _addNewRecord,
+                        //TODO: DEBUG
+                        onPressed: () {
+                          if(widget.mode == FormMode.ADD) {
+                            _addNewRecord();
+                          } else {
+                            _editRecord();
+                          }
+                        },
                       ),
-                    ):Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: ButtonTheme(
-                            height:50, 
-                            child: RaisedButton(
-                              child: Text('변경 취소'),
-                              color: Colors.grey,
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 30,),
-                        Expanded(
-                          child: ButtonTheme(
-                              height: 50,
-                              child: RaisedButton(
-                              child: Text('기록 변경'),
-                              onPressed: _editRecord,
-                            ),
-                          ),
-                        )
-                      ],
-                    )
+                    ),
                   ],
                 ),
               )

@@ -21,6 +21,8 @@ class MethodForm extends StatefulWidget {
 
 class _MethodFormState extends State<MethodForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _methodNameController = TextEditingController();
+  final _methodDescController = TextEditingController();
   List<String> methodsNameList = [];
 
   //State variables
@@ -72,6 +74,7 @@ class _MethodFormState extends State<MethodForm> {
                 child: Text('확인'),
                 onPressed: () {
                   _formKey.currentState.reset();
+                  _clearTextInput();
                   Navigator.of(context).pop();
                 },
               )
@@ -119,7 +122,7 @@ class _MethodFormState extends State<MethodForm> {
               FlatButton(
                 child: Text('확인'),
                 onPressed: () {
-                  _formKey.currentState.reset();
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
               )
@@ -131,6 +134,12 @@ class _MethodFormState extends State<MethodForm> {
       //DEBUG
       print("validation 실패");
     }
+  }
+
+  //clear all inputs
+  void _clearTextInput() {
+    _methodDescController.clear();
+    _methodNameController.clear();
   }
 
   //Chip Option builder
@@ -162,14 +171,15 @@ class _MethodFormState extends State<MethodForm> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            if(_methodName != null || _methodDescription != null || _methodType != null || _methodColor != null) {
-              print('DEBUG: Show me a dialog');
+            if(widget.mode == FormMode.ADD) {
+              Navigator.of(context).pop();
+            } else {
               showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
                     title: Text('경고'),
-                    content: Text('변경사항을 저장하지 않고 닫으시겠습니까?'),
+                    content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
                     actions: <Widget>[
                       FlatButton(
                         child: Text('아니오'),
@@ -188,8 +198,6 @@ class _MethodFormState extends State<MethodForm> {
                   );
                 }
               );
-            } else {
-              Navigator.of(context).pop();
             }
           },
         ),
@@ -204,7 +212,8 @@ class _MethodFormState extends State<MethodForm> {
                   children: [
                     FormBuilderTextField(
                       attribute: 'method_name',
-                      initialValue: _methodName??'',
+                      initialValue: widget.mode == FormMode.ADD?null:_methodName,
+                      controller: widget.mode == FormMode.ADD?_methodNameController:null,
                       validators: [
                         (value) { 
                           return value.length == 0?'거래수단 이름을 입력해 주세요.':null;
@@ -231,7 +240,8 @@ class _MethodFormState extends State<MethodForm> {
                     //Description is optional
                     FormBuilderTextField(
                       attribute: 'method_description',
-                      initialValue: _methodDescription??'',
+                      initialValue: widget.mode == FormMode.ADD?null:_methodDescription,
+                      controller: widget.mode == FormMode.ADD?_methodDescController:null,
                       maxLines: 1,
                       decoration: InputDecoration(
                         labelText: '거래수단 설명',
