@@ -26,6 +26,7 @@ String toKey(String str) {
   return bytes.toString();
 }
 
+//Build Tag UI for records
 Widget tagUIProvider(String str, Color col, bool isIncome) {
   String text = str;
   Color textCol;
@@ -46,6 +47,16 @@ Widget tagUIProvider(String str, Color col, bool isIncome) {
     height: 22,
     decoration: BoxDecoration(border: Border.all(color:col, width:1), borderRadius: BorderRadius.circular(12), color: isfill?col:null),
   );
+}
+//i18n method type converter
+String convertMethodType(String type) {
+  Map multiLanguage = {
+    "credit":"신용카드",
+    "debit":"체크카드",
+    "cash":"현금예산",
+    "point":"포인트"
+  };
+  return multiLanguage[type];
 }
 
 class RecordKeySet {

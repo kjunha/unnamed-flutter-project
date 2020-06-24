@@ -96,7 +96,6 @@ class _OverviewState extends State<Overview> {
     List<dynamic> keys = box.keys.toList();
     for(dynamic key in keys) {
       methodList.add(box.get(key));
-      print(key);
     }
     return methodList;
   }
@@ -156,7 +155,6 @@ class _OverviewState extends State<Overview> {
     //Record Promise
     Record record = element as Record;
     //UI Colors
-    var labelColor = Colors.blue;
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
     return Card(

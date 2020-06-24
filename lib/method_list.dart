@@ -108,7 +108,7 @@ class _MethodListState extends State<MethodList> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Text('거래수단 종류:',style: TextStyle(fontWeight: FontWeight.bold),), 
-            Center(child:Text(currentMethod.type)),
+            Center(child:Text(convertMethodType(currentMethod.type)),),
             Text('생성일자:',style: TextStyle(fontWeight: FontWeight.bold),), 
             Center(child:Text(df.format(currentMethod.dateCreated))),
             ButtonTheme(

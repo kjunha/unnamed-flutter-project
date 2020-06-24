@@ -268,19 +268,19 @@ class _MethodFormState extends State<MethodForm> {
                       initialValue: _methodType,
                       options: [
                         FormBuilderFieldOption(
-                          child: Text("신용카드"),
+                          child: Text(convertMethodType("credit")),
                           value: "credit"
                         ),
                         FormBuilderFieldOption(
-                          child: Text("체크카드"),
+                          child: Text(convertMethodType("debit")),
                           value: "debit"
                         ),
                         FormBuilderFieldOption(
-                          child: Text("현금예산"),
+                          child: Text(convertMethodType("cash")),
                           value: "cash"
                         ),
                         FormBuilderFieldOption(
-                          child: Text("포인트"),
+                          child: Text(convertMethodType("point")),
                           value: "point"
                         ),
                       ],

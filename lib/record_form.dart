@@ -188,7 +188,7 @@ class _RecordFormState extends State<RecordForm> {
             FormBuilderTypeAhead(
               attribute: "transaction_tag",
               decoration: InputDecoration(
-                labelText: '테그',
+                labelText: '태그',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
               ),
               suggestionsCallback: (pattern) async {
@@ -208,7 +208,7 @@ class _RecordFormState extends State<RecordForm> {
 
               noItemsFoundBuilder: (context) {
                 return ListTile(
-                  title: Text('위 이름으로 새로운 테그를 지정합니다.')
+                  title: Text('위 이름으로 새로운 태그를 지정합니다.')
                 );
               },
               onChanged: (value) {setState(() {

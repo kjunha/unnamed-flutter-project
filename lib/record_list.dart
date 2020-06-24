@@ -25,12 +25,14 @@ class _RecordListState extends State<RecordList> {
   }
 
   Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text(df.format(groupByValue));
+    return Text(groupByValue);
   }
 
   //List Tile UI
   Widget _buildRecordList(BuildContext context, Record element, Box box) {
-    var labelColor = Colors.blue;
+    //Record Promise
+    Record record = element as Record;
+    //UI Colors
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
     return Slidable(
@@ -38,21 +40,15 @@ class _RecordListState extends State<RecordList> {
       actionExtentRatio: 0.25,
       child: Card(
         child: ListTile(
-          title:Text('지출내역 상세기록 ',),
-          subtitle: Text('지불수단'),
-          leading: Container(
-            child: Center(child: Text('최대글자', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),)),
-            width: 48,
-            height: 22,
-            decoration: BoxDecoration(border: Border.all(color:labelColor, width:1), borderRadius: BorderRadius.circular(12), color: labelColor),
-          ),
+          title:Text(record.description),
+          subtitle: Text(record.method.name),
+          leading: tagUIProvider(record.tag, Color(record.method.colorHex), record.amount >= 0),
           trailing: Text(
             buildCurrencyString(element.amount, false), 
             style: TextStyle(
               color: element.amount>0?positiveTextColor:negativeTextColor, 
               fontWeight: FontWeight.bold, fontSize: 18
             ),),
-          onTap: () {},
         ),
       ),
       secondaryActions: <Widget>[
@@ -181,7 +177,7 @@ class _RecordListState extends State<RecordList> {
               elements: _readBoxData(box),
               groupBy: (element) {
                 final record = element as Record;
-                return record.date;
+                return df.format(record.date);
               },
               groupSeparatorBuilder: _buildGroupSeparator,
               itemBuilder: (context,element) {
