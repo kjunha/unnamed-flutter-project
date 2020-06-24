@@ -22,19 +22,12 @@ class _MethodListState extends State<MethodList> {
   };
 
   //state fields
-  List<Method> methodList;
   var _segctrSelection;
 
   @override
   void initState() {
     super.initState();
-    methodList = [];
     _segctrSelection = 0;
-    Box box = Hive.box('methods');
-    List<dynamic> keys = box.keys.toList();
-    for (dynamic key in keys) {
-      methodList.add(box.get(key));
-    }
   }
 
   @override
@@ -76,8 +69,8 @@ class _MethodListState extends State<MethodList> {
                 return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
               }
               return Flexible(child: ListView.builder(
-                itemCount: methodList.length,
-                itemBuilder: _buildPointWallet,
+                itemCount: box.length,
+                itemBuilder: (context, i) =>_buildPointWallet(context, i, box),
               ),);
             }
           )
@@ -87,8 +80,8 @@ class _MethodListState extends State<MethodList> {
   }
 
 
-  Widget _buildPointWallet(BuildContext context, int i) {
-    Method currentMethod = methodList[i];
+  Widget _buildPointWallet(BuildContext context, int i, Box box) {
+    Method currentMethod = box.getAt(i);
     return Card(child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
       Container(width:280, child: Card(
         color: Color(currentMethod.colorHex),

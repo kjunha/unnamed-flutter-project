@@ -97,7 +97,7 @@ class _RecordListState extends State<RecordList> {
                   ),
                   FlatButton(
                     child: Text('네'),
-                    onPressed: () async {
+                    onPressed: () {
                       //Find Element Key
                       var keys = box.keys.toList();
                       var key;
@@ -111,7 +111,7 @@ class _RecordListState extends State<RecordList> {
                       if(key == null) {
                         print('key not found');
                       }
-                      await Hive.box('records').deleteAt(key);
+                      Hive.box('records').deleteAt(key);
                       Navigator.of(context).pop();
                     },
                   )

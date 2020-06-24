@@ -98,10 +98,12 @@ class _MethodFormState extends State<MethodForm> {
         Hive.box('methods').put(_methodName, updated);
       } else { //if key is different >> create new and replace
         Method replace = Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain, widget.method.incSubtotal, widget.method.expSubTotal, widget.method.dateCreated);
-        List<dynamic> recordKeys = widget.method.recordKeys;
+        List<dynamic> recordKeys = widget.method.recordKeys.toList();
+        Box recordsBox = Hive.box('records');
         for(int i = 0; i < recordKeys.length; i++) {
-          Record belonging = Hive.box('records').getAt(recordKeys[i]);
+          Record belonging = recordsBox.get(recordKeys[i]);
           belonging.method = replace;
+          recordsBox.put(recordKeys[i], belonging);
           replace.recordKeys.add(recordKeys[i]);
         }
         Hive.box('methods').put(_methodName, replace);
@@ -160,7 +162,6 @@ class _MethodFormState extends State<MethodForm> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            bool _isPopForm = true;
             if(_methodName != null || _methodDescription != null || _methodType != null || _methodColor != null) {
               print('DEBUG: Show me a dialog');
               showDialog(
