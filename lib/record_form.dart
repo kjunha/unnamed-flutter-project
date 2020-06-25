@@ -120,16 +120,20 @@ class _RecordFormState extends State<RecordForm> {
   //on pressed for edited record
   void _editRecord() {
     if(_formKey.currentState.saveAndValidate()) {
-      Method method = Hive.box('methods').get(toKey(_txMethod));
       Record origRecord = Hive.box('records').getAt(_boxKey);
+      Method newMethod = Hive.box('methods').get(toKey(_txMethod));
+      Method origMethod = Hive.box('methods').get(toKey(origRecord.method.name));
       if(_segctrSelection == 1) {
-        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, method, ''));
-        method.incSubtotal += (_amount - origRecord.amount);
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, newMethod, ''));
+        newMethod.incSubtotal += (_amount - origRecord.amount);
       } else {
-        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
-        method.expSubTotal += (_amount - origRecord.amount);
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, newMethod, _txTag??''));
+        newMethod.expSubTotal += (_amount - origRecord.amount);
       }
-      _formKey.currentState.reset();
+      origMethod.recordKeys.remove(_boxKey);
+      newMethod.recordKeys.add(_boxKey);
+      Hive.box('methods').put(toKey(origMethod.name), origMethod);
+      Hive.box('methods').put(toKey(_txMethod),newMethod);
       showDialog(
         context: context,
         builder: (context) {
@@ -167,7 +171,6 @@ class _RecordFormState extends State<RecordForm> {
           labelText: '거래수단',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
         ),
-        // initialValue: 'Male',
         hint: Text('거래수단을 선택해주세요'),
         validators: [(value) { return value == null? "거래수단은 필수항목입니다.":null;},],
         initialValue: _txMethod,

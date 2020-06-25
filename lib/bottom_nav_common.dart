@@ -13,6 +13,10 @@ BottomNavigationBar loadBottomNavigator(BuildContext context) {
         title: SizedBox(height: 0,)
       ),
       BottomNavigationBarItem(
+        icon: Icon(Icons.swap_horiz),
+        title: SizedBox(height: 0,)
+      ),
+      BottomNavigationBarItem(
         icon: Icon(Icons.credit_card),
         title: SizedBox(height: 0,)
       ),
@@ -24,17 +28,28 @@ BottomNavigationBar loadBottomNavigator(BuildContext context) {
     currentIndex: currentIndex,
     onTap: (index) {
       currentIndex = index;
-      if(index == 0) {
-        Navigator.popUntil(context, (route) => route.isFirst);
-        if(Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
-      } else if(index == 1) {
-        Navigator.pushNamed(context, '/records');
-      } else if(index == 2) {
-        Navigator.pushNamed(context, '/methods');
-      } else if(index == 3) {
-        //Navigator.pushNamed(context, '/sand');
+      switch(index){
+        case 0:
+          Navigator.popUntil(context, (route) => route.isFirst);
+          if(Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+          break;
+        case 1:
+          Navigator.pushNamed(context, '/records');
+          break;
+        case 2:
+          Navigator.pushNamed(context, '/transfer');
+          break;
+        case 3:
+          Navigator.pushNamed(context, '/methods');
+          break;
+        case 4:
+          //setting
+          break;
+        default :
+          //404 page not found
+          break;
       }
     },
   );

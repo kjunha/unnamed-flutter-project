@@ -14,6 +14,7 @@ import './method_form.dart';
 import './bottom_nav_common.dart';
 import './record_list.dart';
 import './method_list.dart';
+import './transfer_form.dart';
 
 //Sandbox Dependency
 
@@ -46,7 +47,8 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
         '/new': (context) => MethodForm(),
         '/sand': (context) => Sandbox(),
         '/records': (context) => RecordList(),
-        '/methods': (context) => MethodList()
+        '/methods': (context) => MethodList(),
+        '/transfer': (context) => TransferForm(),
       },
       onGenerateRoute: (setting) {
         if(setting.name == '/records/edit') {

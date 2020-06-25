@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import './model/record.dart';
 import './source_common.dart';
 import './bottom_nav_common.dart';
+import './model/method.dart';
 
 class RecordList extends StatefulWidget {
   @override
@@ -100,14 +101,19 @@ class _RecordListState extends State<RecordList> {
                       for(int i = 0; i < keys.length; i++) {
                         if(box.getAt(i).hashCode == element.hashCode) {
                           key = i;
-                          print('key found: $key');
                           break;
                         }
                       }
-                      if(key == null) {
-                        print('key not found');
+                      Record record = Hive.box('records').get(key);
+                      Method method = Hive.box('methods').get(toKey(record.method.name));
+                      if(record.amount >= 0) {
+                        method.incSubtotal -= record.amount;
+                      } else {
+                        method.expSubTotal -= record.amount;
                       }
-                      Hive.box('records').deleteAt(key);
+                      method.recordKeys.remove(key);
+                      Hive.box('methods').put(toKey(method.name), method);
+                      Hive.box('records').delete(key);
                       Navigator.of(context).pop();
                     },
                   )
