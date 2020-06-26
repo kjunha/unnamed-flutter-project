@@ -31,9 +31,12 @@ class _TransferFormState extends State<TransferForm> {
       //Update Method's inc, exp balance
       Method formMethod;
       Method toMethod;
-      //Add them to list
+      //Add them to list (find new record)
       //save records and methods
       _recordsBox.add(fromRecord);
+      _recordsBox.add(toRecord);
+      _methodsBox.add(formMethod);
+      _methodsBox.add(toMethod);
 
     }
   }
