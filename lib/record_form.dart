@@ -86,14 +86,38 @@ class _RecordFormState extends State<RecordForm> {
     if(_formKey.currentState.saveAndValidate()) {
       Method method = Hive.box('methods').get(toKey(_txMethod));
       Box recordBox = Hive.box('records');
+      Record newRecord;
       if(_segctrSelection == 1) {
-        recordBox.add(Record(_dateInput, _txDescription, _amount, method, ''));
+        newRecord = Record(_dateInput, _txDescription, _amount, method, '');
+        recordBox.add(newRecord);
         method.incSubtotal += _amount;
       } else {
-        recordBox.add(Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??''));
+        newRecord = Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??'');
+        recordBox.add(newRecord);
         method.expSubTotal += _amount;
       }
-      method.recordKeys.add(recordBox.keys.toList()[recordBox.length-1]);
+      int k = findRecordKey(newRecord);
+      if(k != -1) {
+         method.recordKeys.add(k);
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text('저장이 정상적으로 이루어지지 않았습니다.'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('확인'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          }
+        );
+        return;
+      }
       Hive.box('methods').put(toKey(_txMethod),method);
       showDialog(
         context: context,
@@ -373,8 +397,6 @@ class _RecordFormState extends State<RecordForm> {
                         child: Text(widget.mode == FormMode.ADD?'기록 추가':'기록 변경', style: TextStyle(color: Colors.white, fontSize: 16),),
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        //onPressed: _addNewRecord,
-                        //TODO: DEBUG
                         onPressed: () {
                           if(widget.mode == FormMode.ADD) {
                             _addNewRecord();

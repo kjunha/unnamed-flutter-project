@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import './model/record.dart';
 import './model/method.dart';
@@ -57,6 +58,19 @@ String convertMethodType(String type) {
     "point":"포인트"
   };
   return multiLanguage[type];
+}
+
+//auto increment key finder(records)
+//return -1 when key is not found
+int findRecordKey(Record record) {
+  Box box = Hive.box('records');
+  List<dynamic> keysList = box.keys.toList();
+  for(int i = 0; i < keysList.length; i++) {
+    if(box.get(keysList[i]).hashCode == record.hashCode) {
+      return keysList[i] as int;
+    }
+  }
+  return -1;
 }
 
 class RecordKeySet {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import './bottom_nav_common.dart';
+import './model/method.dart';
+import './model/record.dart';
 
 class TransferForm extends StatefulWidget {
   @override
@@ -19,6 +21,23 @@ class _TransferFormState extends State<TransferForm> {
   double _txFee;
   bool _isPercent;
 
+
+  //Submit onPress Handler
+  void makeTransfer() {
+    if(_formKey.currentState.saveAndValidate()) {
+      //Create two record for each method (exp for from, inc for to)
+      Record fromRecord;
+      Record toRecord;
+      //Update Method's inc, exp balance
+      Method formMethod;
+      Method toMethod;
+      //Add them to list
+      //save records and methods
+      _recordsBox.add(fromRecord);
+
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +48,7 @@ class _TransferFormState extends State<TransferForm> {
       _methodNameList.add(_methodsBox.get(key).name);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +143,9 @@ class _TransferFormState extends State<TransferForm> {
                     ),),
                     SizedBox(width: 20,),
                     Expanded(child: FormBuilderSwitch(
-                      label: Row(children: <Widget>[Text('퍼센트 계산'),Flexible],),
+                      label: Row(children: <Widget>[Text('퍼센트 계산'),Flexible(child: IconButton(icon: Icon(Icons.question_answer), onPressed: () {
+                        //TODO Show Tooltip
+                      },))],),
                       attribute: "include_total_asset",
                       initialValue: _isPercent,
                       decoration: InputDecoration(border: InputBorder.none),
@@ -131,6 +153,20 @@ class _TransferFormState extends State<TransferForm> {
                         _isPercent = value;
                       },
                     ),),
+                    ButtonTheme(
+                      minWidth: double.infinity,
+                      height: 50,
+                      child: RaisedButton(
+                        child: Text('송금하기', style: TextStyle(color: Colors.white, fontSize: 16),),
+                        color: Colors.blueAccent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        //TODO: DEBUG
+                        onPressed: () {
+                          _formKey.currentState.saveAndValidate();
+                          print('DEBUG: Clicked');
+                        },
+                      ),
+                    ),
                   ],),
                 ],
               )

@@ -156,6 +156,15 @@ class _OverviewState extends State<Overview> {
   Widget _buildRecordList(BuildContext context, dynamic element) {
     //Record Promise
     Record record = element as Record;
+
+    //TODO DEBUG
+    int k = findRecordKey(record);
+    if(k != -1) {
+      print('DEBUG: key found: ${k}');
+    } else {
+      print('DEBUG: key not found');
+    }
+    
     //UI Colors
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
