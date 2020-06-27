@@ -66,6 +66,8 @@ class _MethodFormState extends State<MethodForm> {
       methodsNameList.add(_methodName);
       Hive.box('methods').put(toKey(_methodName) ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0,DateTime.now()));
       _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('새로운 거래수단이 추가되었습니다.'),));
+      _formKey.currentState.reset();
+      _clearTextInput();
     }
   }
 
@@ -128,7 +130,7 @@ class _MethodFormState extends State<MethodForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('새로운 거래수단 추가하기'), 
         backgroundColor: Colors.blue,

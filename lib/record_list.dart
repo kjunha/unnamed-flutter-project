@@ -4,7 +4,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import './model/record.dart';
 import './source_common.dart';
 import './bottom_nav_common.dart';
@@ -17,18 +16,107 @@ class RecordList extends StatefulWidget {
 
 class _RecordListState extends State<RecordList> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _dateTimeSortController = TextEditingController();
+  final _numDateSortController = TextEditingController();
+  DateTime _dateTimeSort;
+  int _numDateSort;
+  String _methodNameSort;
+  String _txTagSort;
+  Box methodsBox;
+  List<String> _methodsNameList = [];
+  List<Record> _sortedRecordList = [];
+  List<String> _txTagList = [];
 
-  List<Record> _readBoxData(Box box) {
-    List<Record> recordList = [];
-    for(int i = 0; i < box.length; i++) {
-      recordList.add(box.getAt(i));
+  @override
+  void initState() {
+    super.initState();
+    methodsBox = Hive.box('methods');
+    Box tagsBox = Hive.box('tags');
+    List keys = methodsBox.keys.toList();
+    for(dynamic key in keys) {
+      _methodsNameList.add(methodsBox.get(key).name);
     }
-    return recordList;
+    keys.clear();
+
+    for(int i = 0; i < tagsBox.length; i++) {
+      _txTagList.add(tagsBox.getAt(i));
+    }
+    _txTagList.add('수입');
+    _txTagList.add('지출');
+    _txTagList.add('내부송금');
+    _txTagList.add('수수료');
+  }
+
+  //Listener Logic
+  List<Record> _readBoxData(Box box) {
+    _sortedRecordList.clear();
+    List keys = box.keys.toList();
+    for(dynamic key in keys) {
+      _sortedRecordList.add(box.get(key));
+    }
+    return _sortedRecordList;
+  }
+
+  //sort Logic
+  void sortByOptions() {
+    Set<Record> trash = {};
+    if(_methodNameSort != null) {
+      for(Record record in _sortedRecordList) {
+        if(record.method.name != _methodNameSort) {
+          trash.add(record);
+        }
+      }
+    }
+    if(_txTagSort != null) {
+      for(Record record in _sortedRecordList) {
+        if(record.tag != _txTagSort) {
+          trash.add(record);
+        }
+      }
+    }
+    if(_dateTimeSort != null) {
+      DateTime startDate = _dateTimeSort;
+      DateTime endDate = startDate.add(Duration(days: _numDateSort));
+      for(Record record in _sortedRecordList) {
+        if(record.date.isBefore(startDate) || record.date.isAfter(endDate)) {
+          trash.add(record);
+        }
+      }
+    }
+    if(trash.length > 0) {
+      for(Record record in trash) {
+        _sortedRecordList.remove(record);
+      }
+    }
+  }
+
+  //Input & Click Handler
+  void _resetAllOptions() {
+    _readBoxData(Hive.box('records'));
+    _methodNameSort = null;
+    _txTagSort = null;
+    _dateTimeSort = null;
+    _numDateSort = null;
+    _formKey.currentState.reset();
+    clearTextInput();
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(content: Text('검색값이 초기화 되었습니다.'),)
+    );
+  }
+  void _submitSearch() {
+    if(_formKey.currentState.saveAndValidate()) {
+
+    }
+  }
+  void clearTextInput() {
+    _dateTimeSortController.clear();
+    _numDateSortController.clear();
   }
   //List Tile UI
   Widget _buildRecordList(BuildContext context, Record element, Box box) {
     //Record Promise
-    Record record = element as Record;
+    Record record = element;
     //UI Colors
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
@@ -118,8 +206,20 @@ class _RecordListState extends State<RecordList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: Text('수입 및 지출내역 편집'),  backgroundColor: Colors.blue,),
+      key: _scaffoldKey,
+      backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text('수입 및 지출내역 편집'),  
+        backgroundColor: Colors.blue,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/add');
+            },
+          )
+        ],
+      ),
       bottomNavigationBar: loadBottomNavigator(context),
       body: Column(children: <Widget>[
         Container(
@@ -130,40 +230,127 @@ class _RecordListState extends State<RecordList> {
             children: <Widget>[
               Text('수입 및 지출내역 조회', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
               SizedBox(height: 10,),
-              FormBuilder(key: _formKey, child: Row(children: <Widget>[
-                Text('시작일: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                Flexible(child: FormBuilderDateTimePicker(
-                  attribute: "date",
-                  inputType: InputType.date,
-                  format: DateFormat('M/d'),
-                  resetIcon: null,
-                  decoration: InputDecoration(
-                    labelText: '날짜',
-                    labelStyle: TextStyle(fontSize: 14),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                  ),
-                  onChanged: (value) {
-                  },
-                ),),
-                SizedBox(width: 8,),
-                Text('기간: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                Flexible(child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: '일수',
-                      labelStyle: TextStyle(fontSize: 14),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              FormBuilder(
+                key: _formKey, 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    //검색날짜 + 일수
+                    Row(
+                      children: <Widget>[
+                        Flexible(child: FormBuilderDateTimePicker(
+                          attribute: "date",
+                          inputType: InputType.date,
+                          format: df,
+                          resetIcon: null,
+                          controller: _dateTimeSortController,
+                          decoration: InputDecoration(
+                            labelText: '시작일 (날짜)',
+                            labelStyle: TextStyle(fontSize: 14),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                          ),
+                          onChanged: (value) {
+                            _dateTimeSort = value;
+                          },
+                        ),),
+                        SizedBox(width: 8,),
+                        Flexible(child: FormBuilderTextField(
+                            attribute: 'num_date',
+                            keyboardType: TextInputType.number,
+                            controller: _numDateSortController,
+                            validators: [
+                              (value) {
+                                if(_dateTimeSort != null) {
+                                  return value == null || value.length == 0?'검색할 기간을 설정해 주십시오.':null;
+                                }
+                                return null;
+                              },
+                              (value) {
+                                return double.tryParse(value) == null?'숫자값을 입력해 주십시오':null;
+                              },
+                            ],
+                            decoration: InputDecoration(
+                              labelText: '기간 (일수)',
+                              labelStyle: TextStyle(fontSize: 14),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                            ),
+                            onChanged: (value) {
+                              _numDateSort = int.parse(value);
+                            },
+                          ),),
+                      ],
                     ),
-                    onChanged: (value) {},
-                  ),),
-                  SizedBox(width: 8,),
-                RaisedButton(
-                  child: Text('조회'),
-                  onPressed: () {},
-                )
-              ],),)
+                    //검색용 거래수단
+                    SizedBox(height: 6,),
+                    Row(
+                      children: <Widget>[
+                        Expanded(child:FormBuilderDropdown(
+                          attribute: "transaction_method",
+                          decoration: InputDecoration(
+                            labelText: '거래수단',
+                            labelStyle: TextStyle(fontSize: 14),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                          ),
+                          hint: Text('검색할 거래수단을 선택해 주세요'),
+                          items: _methodsNameList
+                            .map((value) => DropdownMenuItem(
+                              value: value,
+                              child: Text("$value")
+                          )).toList(),
+                          onChanged: (value) {
+                            _methodNameSort = value;
+                          },
+                        ),),
+                        SizedBox(width: 8,),
+                        RaisedButton(
+                          child: Text('초기화', style: TextStyle(color: Colors.white),),
+                          color: Colors.grey,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          onPressed: _resetAllOptions,
+                        )
+                      ],
+                    ),
+                    //검색용 태그
+                    Row(
+                      children: <Widget>[
+                        Expanded(child:FormBuilderDropdown(
+                          attribute: "transaction_method",
+                          decoration: InputDecoration(
+                            labelText: '태그',
+                            labelStyle: TextStyle(fontSize: 14),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                          ),
+                          hint: Text('검색할 태그 이름을 선택해 주세요'),
+                          items: _txTagList
+                            .map((value) => DropdownMenuItem(
+                              value: value,
+                              child: Text("$value")
+                          )).toList(),
+                          onChanged: (value) {
+                            _txTagSort = value;
+                          },
+                        ),),
+                        SizedBox(width: 8,),
+                        RaisedButton(
+                          child: Text('조회', style: TextStyle(color: Colors.white),),
+                          color: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          onPressed: _submitSearch,
+                        )
+                      ],
+                    ),
+                  ],
+                ), 
+
+              ),
             ],
           ),
         ),
@@ -181,17 +368,9 @@ class _RecordListState extends State<RecordList> {
               },
               groupSeparatorBuilder: buildGroupSeparator,
               itemBuilder: (context,element) {
-                // var keys = box.keys.toList();
-                // for(int key in keys) {
-                //   if(box.getAt(key).hashCode == element.hashCode) {
-                //     return _buildRecordList(context, element, key);
-                //   }
-                // }
-                // return null;
                 return _buildRecordList(context, element, box);
               },
               shrinkWrap: false,
-              //physics: const NeverScrollableScrollPhysics(),
               physics: null,
             ),);
           },

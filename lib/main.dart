@@ -201,12 +201,11 @@ class _OverviewState extends State<Overview> {
             Card(
               child: Column(children: [
                 ListTile(  
-                  //title: Center(child: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),)),
                   title: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),),
                   dense: false,
                   trailing: IconButton(icon: Icon(Icons.add), onPressed: () {Navigator.pushNamed(context, '/add');},),
                 ),
-                Divider(thickness: 2,),
+                Divider(thickness: 2, color: Colors.black,),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
                   child: ValueListenableBuilder(

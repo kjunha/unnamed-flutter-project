@@ -33,8 +33,19 @@ class _MethodListState extends State<MethodList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: Text('거래수단 관리'),  backgroundColor: Colors.blue,),
+      backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text('거래수단 관리'), 
+        backgroundColor: Colors.blue,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/new');
+            },
+          )
+        ],
+      ),
       bottomNavigationBar: loadBottomNavigator(context),
       body: Column(
         children: <Widget>[

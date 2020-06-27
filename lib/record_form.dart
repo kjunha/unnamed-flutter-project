@@ -25,6 +25,7 @@ class RecordForm extends StatefulWidget {
 
 class _RecordFormState extends State<RecordForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _txAmountController = TextEditingController();
   final _txDescController = TextEditingController();
   final _txTagController = TextEditingController();
@@ -32,7 +33,7 @@ class _RecordFormState extends State<RecordForm> {
     -1:Text('지출 내역'),
     1:Text('수입 내역')
   };
-  List<String> _methodNameList = [];
+  List<String> _methodsNameList = [];
   List<String> _tagList = [];
 
   //State variable
@@ -64,7 +65,7 @@ class _RecordFormState extends State<RecordForm> {
     }
     List<dynamic> keys = methodsbox.keys.toList();
     for(dynamic key in keys) {
-      _methodNameList.add(methodsbox.get(key).name);
+      _methodsNameList.add(methodsbox.get(key).name);
     }
     if(widget.mode == FormMode.ADD) {
       _segctrSelection = -1;
@@ -100,44 +101,17 @@ class _RecordFormState extends State<RecordForm> {
       if(k != -1) {
          method.recordKeys.add(k);
       } else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text('저장이 정상적으로 이루어지지 않았습니다.'),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('확인'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          }
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(content: Text('경고: 인덱스가 정상적으로 저장되지 않았습니다. 기록을 삭제하고 다시 시도해 주세요.'),),
         );
         return;
       }
       Hive.box('methods').put(toKey(_txMethod),method);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('입력 완료'),
-            content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('확인'),
-                onPressed: () {
-                  _formKey.currentState.reset();
-                  _clearTextInput();
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(content: Text('새로운 수입 및 지출내역이 추가되었습니다.'),)
       );
+      _formKey.currentState.reset();
+      _clearTextInput();
     }
   }
 
@@ -158,24 +132,10 @@ class _RecordFormState extends State<RecordForm> {
       newMethod.recordKeys.add(_boxKey);
       Hive.box('methods').put(toKey(origMethod.name), origMethod);
       Hive.box('methods').put(toKey(_txMethod),newMethod);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('입력 완료'),
-            content: Text('수입 및 지출내역이 변경되었습니다.'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('확인'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(content: Text('수입 및 지출내역이 변경되었습니다.'),)
       );
+      Navigator.of(context).pop();
     }
   }
 
@@ -198,7 +158,7 @@ class _RecordFormState extends State<RecordForm> {
         hint: Text('거래수단을 선택해주세요'),
         validators: [(value) { return value == null? "거래수단은 필수항목입니다.":null;},],
         initialValue: _txMethod,
-        items: _methodNameList
+        items: _methodsNameList
           .map((value) => DropdownMenuItem(
             value: value,
             child: Text("$value")
@@ -270,7 +230,8 @@ class _RecordFormState extends State<RecordForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      key: _scaffoldKey,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('수입 및 지출내역 추가'),
         backgroundColor: Colors.blue,
