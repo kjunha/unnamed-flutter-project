@@ -45,7 +45,6 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
         '/add': (context) => RecordForm(),
         //'/about': (context) => AboutApp(),
         '/new': (context) => MethodForm(),
-        '/sand': (context) => Sandbox(),
         '/records': (context) => RecordList(),
         '/methods': (context) => MethodList(),
         '/transfer': (context) => TransferForm(),
@@ -85,6 +84,7 @@ class Overview extends StatefulWidget {
 }
 
 class _OverviewState extends State<Overview> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Record> _readRecordData(Box box) {
     List<Record> recordList = [];
     for(int i = 0; i < box.length; i++) {
@@ -101,9 +101,6 @@ class _OverviewState extends State<Overview> {
     }
     return methodList;
   }
-
-  //TODO: such state like: onReloaded
-  //update Total Asset view
 
   //Method Card builder
   List<Widget> _buildPointWallet(BuildContext context) {
@@ -146,25 +143,10 @@ class _OverviewState extends State<Overview> {
     _walletStack.add(SizedBox(height: 30,));
     return _walletStack;
   }
-
-  //Group List Group bar
-  Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text(groupByValue);
-  }
-
   //List Tile UI
   Widget _buildRecordList(BuildContext context, dynamic element) {
     //Record Promise
-    Record record = element as Record;
-
-    //TODO DEBUG
-    int k = findRecordKey(record);
-    if(k != -1) {
-      print('DEBUG: key found: ${k}');
-    } else {
-      print('DEBUG: key not found');
-    }
-    
+    Record record = element as Record;    
     //UI Colors
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
@@ -182,11 +164,11 @@ class _OverviewState extends State<Overview> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Overview'),
         centerTitle: true,
@@ -202,6 +184,11 @@ class _OverviewState extends State<Overview> {
               child: ValueListenableBuilder(
                 valueListenable: Hive.box('methods').listenable(),
                 builder: (context, box, _) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if(Hive.box('methods').isEmpty) {
+                      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('먼저 거래수단을 추가해 주세요.'),));
+                    }
+                  });
                   return ExpansionTile(
                     title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
                     initiallyExpanded: true,
@@ -223,15 +210,30 @@ class _OverviewState extends State<Overview> {
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
                   child: ValueListenableBuilder(
-                    valueListenable: Hive.box('methods').listenable(),
+                    valueListenable: Hive.box('records').listenable(),
                     builder: (context, box, _) {
-                      List<dynamic> methodKeys = box.keys.toList();
+                      List<dynamic> recordKeys = box.keys.toList();
                       double _incSubtotal = 0;
                       double _expSubtotal = 0;
-                      for(dynamic key in methodKeys) {
-                        Method mtd = box.get(key) as Method;
-                        _incSubtotal += mtd.incSubtotal;
-                        _expSubtotal += mtd.expSubTotal;
+                      double _previous = 0;
+                      for(dynamic key in recordKeys) {
+                        Record rcd = box.get(key) as Record;
+                        if(rcd.method.isIncluded) {
+                          if(rcd.amount != _previous) {
+                            if(rcd.amount >= 0) {
+                              _incSubtotal += rcd.amount;
+                            } else {
+                              _expSubtotal += rcd.amount*-1;
+                            }
+                          } else {
+                            if(rcd.amount >= 0) {
+                              _expSubtotal -= _previous;
+                            } else {
+                              _incSubtotal -= _previous*-1;
+                            }
+                          }
+                        }
+                        _previous = rcd.amount*-1;
                       }
                       double _total = _incSubtotal - _expSubtotal;
                       return Table(
@@ -278,7 +280,7 @@ class _OverviewState extends State<Overview> {
                     final record = element as Record;
                     return df.format(record.date);
                   },
-                  groupSeparatorBuilder: _buildGroupSeparator,
+                  groupSeparatorBuilder: buildGroupSeparator,
                   itemBuilder: _buildRecordList,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -289,67 +291,6 @@ class _OverviewState extends State<Overview> {
           ],
         ),
       )
-    );
-  }
-}
-
-//(DEVONLY)Sandbox
-class Sandbox extends StatefulWidget {
-  @override
-  _SandboxState createState() => _SandboxState();
-}
-
-class _SandboxState extends State<Sandbox> {
-  final _dummy = [1,2,3,4,5];
-  Widget _buildListItem(BuildContext context, int index) {
-    return ListTile(
-      title: Text('item ' + _dummy[index].toString()),
-      subtitle: Text('my item'),
-      trailing: SizedBox(width: 96, child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () {},
-          )
-        ],
-      ),),
-    );
-  }
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Sandbox'), backgroundColor: Colors.orange, actions: [IconButton(icon: Icon(Icons.add), onPressed: () {},)],),
-        bottomNavigationBar: BottomNavigationBar (
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: SizedBox(height: 0,)
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: SizedBox(height: 0,)
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: SizedBox(height: 0,)
-            ),
-          ],
-        ),
-        body:Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Flexible(child: ListView.builder(
-              itemCount: _dummy.length,
-              itemBuilder: _buildListItem
-            ),)
-          ],
-        )
-      ),
     );
   }
 }

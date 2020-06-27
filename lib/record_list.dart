@@ -4,6 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import './model/record.dart';
 import './source_common.dart';
 import './bottom_nav_common.dart';
@@ -24,11 +25,6 @@ class _RecordListState extends State<RecordList> {
     }
     return recordList;
   }
-
-  Widget _buildGroupSeparator(dynamic groupByValue) {
-    return Text(groupByValue);
-  }
-
   //List Tile UI
   Widget _buildRecordList(BuildContext context, Record element, Box box) {
     //Record Promise
@@ -96,20 +92,13 @@ class _RecordListState extends State<RecordList> {
                     child: Text('네'),
                     onPressed: () {
                       //Find Element Key
-                      var keys = box.keys.toList();
-                      var key;
-                      for(int i = 0; i < keys.length; i++) {
-                        if(box.getAt(i).hashCode == element.hashCode) {
-                          key = i;
-                          break;
-                        }
-                      }
+                      int key = findRecordKey(element);
                       Record record = Hive.box('records').get(key);
                       Method method = Hive.box('methods').get(toKey(record.method.name));
                       if(record.amount >= 0) {
                         method.incSubtotal -= record.amount;
                       } else {
-                        method.expSubTotal -= record.amount;
+                        method.expSubTotal += record.amount;
                       }
                       method.recordKeys.remove(key);
                       Hive.box('methods').put(toKey(method.name), method);
@@ -129,50 +118,55 @@ class _RecordListState extends State<RecordList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: Text('수입 및 지출내역 편집'),  backgroundColor: Colors.blue,),
       bottomNavigationBar: loadBottomNavigator(context),
       body: Column(children: <Widget>[
-        Card(child: Container(margin:EdgeInsets.symmetric(vertical:16, horizontal:16),child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text('수입 및 지출내역 조회', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-            SizedBox(height: 10,),
-            FormBuilder(key: _formKey, child: Row(children: <Widget>[
-              Text('시작일: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-              Flexible(child: FormBuilderDateTimePicker(
-                attribute: "date",
-                inputType: InputType.date,
-                format: df,
-                decoration: InputDecoration(
-                  labelText: '날짜',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
-                ),
-                // onChanged: (value) {setState(() {
-                //   _dateInput = value;
-                //   print('date: ' + df.format(_dateInput));
-                // });},
-              ),),
-              SizedBox(width: 8,),
-              Text('기간: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-              Flexible(child: TextFormField(
-                  keyboardType: TextInputType.number,
+        Container(
+          color: Colors.white,
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text('수입 및 지출내역 조회', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+              SizedBox(height: 10,),
+              FormBuilder(key: _formKey, child: Row(children: <Widget>[
+                Text('시작일: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Flexible(child: FormBuilderDateTimePicker(
+                  attribute: "date",
+                  inputType: InputType.date,
+                  format: DateFormat('M/d'),
+                  resetIcon: null,
                   decoration: InputDecoration(
-                    labelText: '일수',
-                    hintText: '15일',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                    labelText: '날짜',
+                    labelStyle: TextStyle(fontSize: 14),
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   ),
-                  //TODO Validate only positive value
-                  //TODO Validate only parsable
-                  onChanged: (value) {},
+                  onChanged: (value) {
+                  },
                 ),),
                 SizedBox(width: 8,),
-              RaisedButton(
-                child: Text('조회'),
-                onPressed: () {},
-              )
-            ],),)
-          ],
-        ),),),
+                Text('기간: ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Flexible(child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: '일수',
+                      labelStyle: TextStyle(fontSize: 14),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    ),
+                    onChanged: (value) {},
+                  ),),
+                  SizedBox(width: 8,),
+                RaisedButton(
+                  child: Text('조회'),
+                  onPressed: () {},
+                )
+              ],),)
+            ],
+          ),
+        ),
         ValueListenableBuilder(
           valueListenable: Hive.box('records').listenable(),
           builder: (context, box, _) {
@@ -185,7 +179,7 @@ class _RecordListState extends State<RecordList> {
                 final record = element as Record;
                 return df.format(record.date);
               },
-              groupSeparatorBuilder: _buildGroupSeparator,
+              groupSeparatorBuilder: buildGroupSeparator,
               itemBuilder: (context,element) {
                 // var keys = box.keys.toList();
                 // for(int key in keys) {

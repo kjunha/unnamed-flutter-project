@@ -33,34 +33,38 @@ class _MethodListState extends State<MethodList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: Text('거래수단 관리'),  backgroundColor: Colors.blue,),
-      backgroundColor: Colors.grey[300],
       bottomNavigationBar: loadBottomNavigator(context),
       body: Column(
         children: <Widget>[
-          Card(child:Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              SizedBox(height: 5,),
-              Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
-              Container(
-                padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
-                width: double.infinity,
-                child: MaterialSegmentedControl(
-                  children: _children,
-                  selectionIndex: _segctrSelection,
-                  selectedColor: Colors.blueAccent,
-                  unselectedColor: Colors.white,
-                  borderRadius: 5.0,
-                  onSegmentChosen: (index) {
-                    setState(() {
-                      _segctrSelection = index;
-                    });
-                  },
+          Container(
+            padding: EdgeInsets.all(5),
+            color: Colors.white,
+            child:Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(height: 5,),
+                Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
+                  width: double.infinity,
+                  child: MaterialSegmentedControl(
+                    children: _children,
+                    selectionIndex: _segctrSelection,
+                    selectedColor: Colors.blueAccent,
+                    unselectedColor: Colors.white,
+                    borderRadius: 25.0,
+                    onSegmentChosen: (index) {
+                      setState(() {
+                        _segctrSelection = index;
+                      });
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),),
+              ],
+            ),
+          ),
           
           ValueListenableBuilder(
             valueListenable: Hive.box('methods').listenable(),
@@ -142,11 +146,10 @@ class _MethodListState extends State<MethodList> {
                           child: Text('네'),
                           onPressed: () {
                             List<dynamic> recordKeys = currentMethod.recordKeys;
-                            print('key check' + recordKeys.toString());
                             for(int i = 0; i < recordKeys.length; i++) {
                               Hive.box('records').delete(recordKeys[i]);
                             }
-                            Hive.box('methods').delete(currentMethod.name);
+                            Hive.box('methods').delete(toKey(currentMethod.name));
                             Navigator.of(context).pop();
                           },
                         )

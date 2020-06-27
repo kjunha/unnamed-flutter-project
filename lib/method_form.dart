@@ -22,6 +22,7 @@ class MethodForm extends StatefulWidget {
 
 class _MethodFormState extends State<MethodForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _methodNameController = TextEditingController();
   final _methodDescController = TextEditingController();
   List<String> methodsNameList = [];
@@ -64,28 +65,7 @@ class _MethodFormState extends State<MethodForm> {
     if(_formKey.currentState.saveAndValidate()) {
       methodsNameList.add(_methodName);
       Hive.box('methods').put(toKey(_methodName) ,Method(_methodName, _methodDescription, _methodType, _methodColor, _isTotalAsset, _isOnMain,0,0,DateTime.now()));
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('입력 완료'),
-            content: Text('새로운 거래수단이 추가되었습니다.'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('확인'),
-                onPressed: () {
-                  _formKey.currentState.reset();
-                  _clearTextInput();
-                  Navigator.of(context).pop();
-                },
-              )
-            ]
-          );
-        }
-      );
-    } else {
-      //DEBUG
-      print("validation 실패");
+      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('새로운 거래수단이 추가되었습니다.'),));
     }
   }
 
@@ -113,27 +93,8 @@ class _MethodFormState extends State<MethodForm> {
         Hive.box('methods').put(toKey(_methodName), replace);
         Hive.box('methods').delete(toKey(widget.method.name));
       }
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('입력 완료'),
-            content: Text('거래수단의 정보가 갱신되었습니다.'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('확인'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                },
-              )
-            ]
-          );
-        }
-      );
-    } else {
-      //DEBUG
-      print("validation 실패");
+      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('수정된 거래수단의 정보를 저장했습니다.'),));
+      Navigator.of(context).pop();
     }
   }
 
@@ -166,6 +127,8 @@ class _MethodFormState extends State<MethodForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.grey[300],
       appBar: AppBar(
         title: Text('새로운 거래수단 추가하기'), 
         backgroundColor: Colors.blue,

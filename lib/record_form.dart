@@ -270,147 +270,148 @@ class _RecordFormState extends State<RecordForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('수입 및 지출내역 추가'),
-          backgroundColor: Colors.blue,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              if(widget.mode == FormMode.ADD) {
-                Navigator.of(context).pop();
-              } else {
-                if(widget.record.description != _txDescription || widget.record.amount != _amount) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text('아니오'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          FlatButton(
-                            child: Text('네'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
-                      );
-                    }
-                  );
-                }
+      backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text('수입 및 지출내역 추가'),
+        backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if(widget.mode == FormMode.ADD) {
+              Navigator.of(context).pop();
+            } else {
+              if(widget.record.description != _txDescription || widget.record.amount != _amount) {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text('아니오'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('네'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ],
+                    );
+                  }
+                );
               }
-            },
-          ),
+            }
+          },
         ),
-        body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
-          margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
-          child: Column(
-            children: [
-              widget.mode == FormMode.ADD?Container(
-                width: double.infinity,
-                child: MaterialSegmentedControl(
-                  children: _children,
-                  selectionIndex: _segctrSelection,
-                  selectedColor: Colors.blueAccent,
-                  unselectedColor: Colors.white,
-                  borderRadius: 5.0,
-                  onSegmentChosen: (index) {
-                    setState(() {
-                      _segctrSelection = index;
-                    });
-                  },
-                ),
-              ):SizedBox(height:0),
-              SizedBox(height: 25,),
-              FormBuilder(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    FormBuilderDateTimePicker(
-                      attribute: "date",
-                      inputType: InputType.date,
-                      format: df,
-                      initialDate: _dateInput,
-                      initialValue: _dateInput,
-                      validators: [
-                        (value) { return value == null? "날짜는 필수항목 입니다.":null;}
-                      ],
-                      decoration: InputDecoration(
-                        labelText: '날짜',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
-                      ),
-                      onChanged: (value) {setState(() {
-                        _dateInput = value;
-                      });},
+      ),
+      body: SingleChildScrollView(scrollDirection: Axis.vertical, child: Container(
+        margin: EdgeInsets.symmetric(vertical: 18, horizontal: 30),
+        child: Column(
+          children: [
+            widget.mode == FormMode.ADD?Container(
+              width: double.infinity,
+              child: MaterialSegmentedControl(
+                children: _children,
+                selectionIndex: _segctrSelection,
+                selectedColor: Colors.blueAccent,
+                unselectedColor: Colors.white,
+                borderRadius: 25.0,
+                onSegmentChosen: (index) {
+                  setState(() {
+                    _segctrSelection = index;
+                  });
+                },
+              ),
+            ):SizedBox(height:0),
+            SizedBox(height: 25,),
+            FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
+                  FormBuilderDateTimePicker(
+                    attribute: "date",
+                    inputType: InputType.date,
+                    format: df,
+                    initialDate: _dateInput,
+                    initialValue: _dateInput,
+                    validators: [
+                      (value) { return value == null? "날짜는 필수항목 입니다.":null;}
+                    ],
+                    decoration: InputDecoration(
+                      labelText: '날짜',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                     ),
-                    SizedBox(height: 18,),
-                    FormBuilderTextField(
-                      attribute: "tx_description",
-                      validators: [(value) { return value.length == 0? "거래내역은 필수항목 입니다.":null;}],
-                      maxLines: 1,
-                      initialValue: widget.mode == FormMode.ADD?null:_txDescription,
-                      controller: widget.mode == FormMode.ADD?_txDescController:null,
-                      decoration: InputDecoration(
-                        labelText: '거래내역',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
-                      ),
-                      onChanged: (value) {setState(() {
-                        _txDescription = value;
-                      });},
+                    onChanged: (value) {setState(() {
+                      _dateInput = value;
+                    });},
+                  ),
+                  SizedBox(height: 18,),
+                  FormBuilderTextField(
+                    attribute: "tx_description",
+                    validators: [(value) { return value.length == 0? "거래내역은 필수항목 입니다.":null;}],
+                    maxLines: 1,
+                    initialValue: widget.mode == FormMode.ADD?null:_txDescription,
+                    controller: widget.mode == FormMode.ADD?_txDescController:null,
+                    decoration: InputDecoration(
+                      labelText: '거래내역',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
                     ),
-                    SizedBox(height: 18,),
-                    FormBuilderTextField(
-                      attribute: "amount",
-                      validators: [
-                        (value) {return value.length == 0? "금액은 필수항목 입니다.":null;},
-                        (value) {return double.tryParse(value) == null ? "숫자값을 입력해 주세요":null;}
-                      ],
-                      maxLines: 1,
-                      initialValue: widget.mode == FormMode.ADD?null:nf.format(_amount),
-                      controller: widget.mode == FormMode.ADD?_txAmountController:null,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: '금액',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
-                      ),
-                      onChanged: (value) {
-                        if(value.length > 0) {
-                          setState(() {
-                            _amount = double.parse(value);
-                          });
+                    onChanged: (value) {setState(() {
+                      _txDescription = value;
+                    });},
+                  ),
+                  SizedBox(height: 18,),
+                  FormBuilderTextField(
+                    attribute: "amount",
+                    validators: [
+                      (value) {return value.length == 0? "금액은 필수항목 입니다.":null;},
+                      (value) {return double.tryParse(value) == null ? "숫자값을 입력해 주세요":null;}
+                    ],
+                    maxLines: 1,
+                    initialValue: widget.mode == FormMode.ADD?null:nf.format(_amount),
+                    controller: widget.mode == FormMode.ADD?_txAmountController:null,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: '금액',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(5), borderSide: BorderSide())
+                    ),
+                    onChanged: (value) {
+                      if(value.length > 0) {
+                        setState(() {
+                          _amount = double.parse(value);
+                        });
+                      }
+                    },
+                  ),
+                  SizedBox(height: 18,),
+                  _selectRecordType(),
+                  SizedBox(height: 25,),
+                  ButtonTheme(
+                    minWidth: double.infinity,
+                    height: 50,
+                    child: RaisedButton(
+                      child: Text(widget.mode == FormMode.ADD?'기록 추가':'기록 변경', style: TextStyle(color: Colors.white, fontSize: 16),),
+                      color: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                      onPressed: () {
+                        if(widget.mode == FormMode.ADD) {
+                          _addNewRecord();
+                        } else {
+                          _editRecord();
                         }
                       },
                     ),
-                    SizedBox(height: 18,),
-                    _selectRecordType(),
-                    SizedBox(height: 25,),
-                    ButtonTheme(
-                      minWidth: double.infinity,
-                      height: 50,
-                      child: RaisedButton(
-                        child: Text(widget.mode == FormMode.ADD?'기록 추가':'기록 변경', style: TextStyle(color: Colors.white, fontSize: 16),),
-                        color: Colors.blueAccent,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        onPressed: () {
-                          if(widget.mode == FormMode.ADD) {
-                            _addNewRecord();
-                          } else {
-                            _editRecord();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),) 
     );
   }

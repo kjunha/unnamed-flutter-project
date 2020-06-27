@@ -31,17 +31,24 @@ BottomNavigationBar loadBottomNavigator(BuildContext context) {
       switch(index){
         case 0:
           Navigator.popUntil(context, (route) => route.isFirst);
+          currentIndex = 0;
+          break;
+        case 1:
           if(Navigator.canPop(context)) {
             Navigator.pop(context);
           }
-          break;
-        case 1:
           Navigator.pushNamed(context, '/records');
           break;
         case 2:
+          if(Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
           Navigator.pushNamed(context, '/transfer');
           break;
         case 3:
+          if(Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
           Navigator.pushNamed(context, '/methods');
           break;
         case 4:

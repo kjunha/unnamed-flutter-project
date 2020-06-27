@@ -9,7 +9,7 @@ import './model/method.dart';
 import 'package:intl/intl.dart';
 
 final nf = NumberFormat("#,###.##");
-final df = DateFormat('yyyy-MM-dd');
+final df = DateFormat('yyyy/MM/dd');
 final _unit = ' 원';
 final _point = ' P';
 
@@ -41,6 +41,9 @@ Widget tagUIProvider(String str, Color col, bool isIncome) {
       text = '지출';
       textCol = Colors.black;
     }
+  } else if(text == '내부송금') {
+    isfill = false;
+    textCol = Colors.orange;
   }
   return Container(
     child: Center(child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textCol??Colors.white, letterSpacing: 1),)),
@@ -71,6 +74,19 @@ int findRecordKey(Record record) {
     }
   }
   return -1;
+}
+
+//Group List Group bar
+Widget buildGroupSeparator(dynamic groupByValue) {
+  return Row(
+    children: <Widget>[
+      SizedBox(width: 20),
+      Text(groupByValue, style: TextStyle(fontSize: 16),),
+      SizedBox(width: 12),
+      Expanded(child: Divider(color: Colors.black,),),
+      SizedBox(width: 20),
+    ],
+  );
 }
 
 class RecordKeySet {
