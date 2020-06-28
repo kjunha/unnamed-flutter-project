@@ -24,6 +24,7 @@ class _RecordListState extends State<RecordList> {
   String _methodNameSort;
   String _txTagSort;
   Box methodsBox;
+  Box recordsBox;
   List<String> _methodsNameList = [];
   List<Record> _sortedRecordList = [];
   List<String> _txTagList = [];
@@ -32,13 +33,13 @@ class _RecordListState extends State<RecordList> {
   void initState() {
     super.initState();
     methodsBox = Hive.box('methods');
+    recordsBox = Hive.box('records');
     Box tagsBox = Hive.box('tags');
     List keys = methodsBox.keys.toList();
     for(dynamic key in keys) {
       _methodsNameList.add(methodsBox.get(key).name);
     }
-    keys.clear();
-
+    _sortedRecordList = _revertOriginal();
     for(int i = 0; i < tagsBox.length; i++) {
       _txTagList.add(tagsBox.getAt(i));
     }
@@ -47,20 +48,20 @@ class _RecordListState extends State<RecordList> {
     _txTagList.add('내부송금');
     _txTagList.add('수수료');
   }
-
-  //Listener Logic
-  List<Record> _readBoxData(Box box) {
-    _sortedRecordList.clear();
-    List keys = box.keys.toList();
+  //revert original list
+  List<Record> _revertOriginal() {
+    List<Record> originalRecordsList = [];
+    List keys = recordsBox.keys.toList();
     for(dynamic key in keys) {
-      _sortedRecordList.add(box.get(key));
+      originalRecordsList.add(recordsBox.get(key));
     }
-    return _sortedRecordList;
+    return originalRecordsList;
   }
-
   //sort Logic
-  void sortByOptions() {
+  List<Record> _sortByOptions(List<Record> beforeSort) {
     Set<Record> trash = {};
+    List<Record> afterSort = [];
+    afterSort.addAll(beforeSort);
     if(_methodNameSort != null) {
       for(Record record in _sortedRecordList) {
         if(record.method.name != _methodNameSort) {
@@ -86,33 +87,50 @@ class _RecordListState extends State<RecordList> {
     }
     if(trash.length > 0) {
       for(Record record in trash) {
-        _sortedRecordList.remove(record);
+        afterSort.remove(record);
       }
     }
+    return afterSort;
   }
 
   //Input & Click Handler
   void _resetAllOptions() {
-    _readBoxData(Hive.box('records'));
+    //set current search result back to original
+    List<Record> originalRecordsList = _revertOriginal();
+    setState(() {
+      _sortedRecordList = [];
+      _sortedRecordList.addAll(originalRecordsList);
+    });
+    //reset all variables
     _methodNameSort = null;
     _txTagSort = null;
     _dateTimeSort = null;
     _numDateSort = null;
     _formKey.currentState.reset();
     clearTextInput();
+    //show snackbar message
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(content: Text('검색값이 초기화 되었습니다.'),)
     );
   }
   void _submitSearch() {
     if(_formKey.currentState.saveAndValidate()) {
+      List<Record>originalRecordsList = _revertOriginal();
+      List<Record>afterSearch = _sortByOptions(originalRecordsList);
+      setState(() {
+        _sortedRecordList = [];
+        _sortedRecordList.addAll(afterSearch);
+      });
 
     }
   }
+  //clear all Text based input
   void clearTextInput() {
     _dateTimeSortController.clear();
     _numDateSortController.clear();
   }
+
+  
   //List Tile UI
   Widget _buildRecordList(BuildContext context, Record element, Box box) {
     //Record Promise
@@ -263,12 +281,13 @@ class _RecordListState extends State<RecordList> {
                             validators: [
                               (value) {
                                 if(_dateTimeSort != null) {
-                                  return value == null || value.length == 0?'검색할 기간을 설정해 주십시오.':null;
+                                  if(value == null || value.length == 0){
+                                    return '검색할 기간을 설정해 주십시오.';
+                                  } else {
+                                    return double.tryParse(value) == null?'숫자값을 입력해 주십시오':null;
+                                  }
                                 }
                                 return null;
-                              },
-                              (value) {
-                                return double.tryParse(value) == null?'숫자값을 입력해 주십시오':null;
                               },
                             ],
                             decoration: InputDecoration(
@@ -357,11 +376,12 @@ class _RecordListState extends State<RecordList> {
         ValueListenableBuilder(
           valueListenable: Hive.box('records').listenable(),
           builder: (context, box, _) {
+            print('Value Listenable Builder called');
             if(box.values.isEmpty) {
               return Center(child: Text('여기에 수입 및 지출기록이 보여집니다.'),);
             }
             return Flexible(child: GroupedListView(
-              elements: _readBoxData(box),
+              elements: _sortedRecordList,
               groupBy: (element) {
                 final record = element as Record;
                 return df.format(record.date);
