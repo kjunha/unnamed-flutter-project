@@ -1,10 +1,12 @@
 import 'package:finance_point/model/record.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 //common source
-import 'source_common.dart';
+import './guage_view_painter.dart';
+import './source_common.dart';
 //import model
 import './model/record.dart';
 import './model/method.dart';
@@ -181,7 +183,14 @@ class _OverviewState extends State<Overview> {
           children: [
             //데이터 시각화 카드
             Card(
-            
+              child: Container(
+                color: Colors.grey[300],
+                margin: EdgeInsets.all(10),
+                child: CustomPaint(
+                  size: Size(360,240),
+                  painter: GuageViewPainter(),
+                ),
+              ),
               //Structure: ValueListenableBuilder > Expansion Tile > Canvas
             ),
             //거래수단 목록 카드
