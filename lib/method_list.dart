@@ -30,73 +30,9 @@ class _MethodListState extends State<MethodList> {
     _segctrSelection = 0;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[300],
-      appBar: AppBar(
-        title: Text('거래수단 관리'), 
-        backgroundColor: Colors.blue,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/new');
-            },
-          )
-        ],
-      ),
-      bottomNavigationBar: loadBottomNavigator(context),
-      body: Column(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(5),
-            color: Colors.white,
-            child:Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SizedBox(height: 5,),
-                Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
-                  width: double.infinity,
-                  child: MaterialSegmentedControl(
-                    children: _children,
-                    selectionIndex: _segctrSelection,
-                    selectedColor: Colors.blueAccent,
-                    unselectedColor: Colors.white,
-                    borderRadius: 25.0,
-                    onSegmentChosen: (index) {
-                      setState(() {
-                        _segctrSelection = index;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          ValueListenableBuilder(
-            valueListenable: Hive.box('methods').listenable(),
-            builder: (context, box,  _) {
-              if(box.values.isEmpty) {
-                return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
-              }
-              return Flexible(child: ListView.builder(
-                itemCount: box.length,
-                itemBuilder: (context, i) =>_buildPointWallet(context, i, box),
-              ),);
-            }
-          )
-        ],
-      ),
-    );
-  }
+  Widget _buildPointWallet(BuildContext context, int i, List<Method> filtered) {
+    Method currentMethod = filtered[i];
 
-
-  Widget _buildPointWallet(BuildContext context, int i, Box box) {
-    Method currentMethod = box.getAt(i);
     return Card(child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
       Container(width:280, child: Card(
         color: Color(currentMethod.colorHex),
@@ -176,5 +112,90 @@ class _MethodListState extends State<MethodList> {
       )),
       SizedBox(width: 10,),
     ],),);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text('거래수단 관리'), 
+        backgroundColor: Colors.blue,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/new');
+            },
+          )
+        ],
+      ),
+      bottomNavigationBar: loadBottomNavigator(context),
+      body: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(5),
+            color: Colors.white,
+            child:Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                SizedBox(height: 5,),
+                Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
+                  width: double.infinity,
+                  child: MaterialSegmentedControl(
+                    children: _children,
+                    selectionIndex: _segctrSelection,
+                    selectedColor: Colors.blueAccent,
+                    unselectedColor: Colors.white,
+                    borderRadius: 25.0,
+                    onSegmentChosen: (index) {
+                      setState(() {
+                        _segctrSelection = index;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          ValueListenableBuilder(
+            valueListenable: Hive.box('methods').listenable(),
+            builder: (context, box,  _) {
+              if(box.values.isEmpty) {
+                return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
+              }
+              List<Method> filtered = [];
+              List keys = box.keys.toList();
+              for(dynamic key in keys) {
+                switch(_segctrSelection) {
+                  case 1:
+                    if(box.get(key).type == "credit") filtered.add(box.get(key));
+                    break;
+                  case 2:
+                    if(box.get(key).type == "debit") filtered.add(box.get(key));
+                    break;
+                  case 3:
+                    if(box.get(key).type == "cash") filtered.add(box.get(key));
+                    break;
+                  case 4:
+                    if(box.get(key).type == "point") filtered.add(box.get(key));
+                    break;
+                  default:
+                    filtered.add(box.get(key));
+                    break;
+                }
+              }
+              return Flexible(child: ListView.builder(
+                itemCount: filtered.length,
+                itemBuilder: (context, i) =>_buildPointWallet(context, i, filtered),
+              ),);
+            }
+          )
+        ],
+      ),
+    );
   }
 }

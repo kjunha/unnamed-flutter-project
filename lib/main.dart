@@ -179,6 +179,11 @@ class _OverviewState extends State<Overview> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            //데이터 시각화 카드
+            Card(
+            
+              //Structure: ValueListenableBuilder > Expansion Tile > Canvas
+            ),
             //거래수단 목록 카드
             Card(
               child: ValueListenableBuilder(

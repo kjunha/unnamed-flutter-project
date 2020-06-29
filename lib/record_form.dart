@@ -34,7 +34,7 @@ class _RecordFormState extends State<RecordForm> {
     1:Text('수입 내역')
   };
   List<String> _methodsNameList = [];
-  List<String> _tagList = [];
+  Set<String> _tagsSet = {};
 
   //State variable
   int _segctrSelection;
@@ -61,7 +61,7 @@ class _RecordFormState extends State<RecordForm> {
       tagsBox.add('병원');
     }
     for(int i = 0; i < tagsBox.length; i++) {
-      _tagList.add(tagsBox.getAt(i));
+      _tagsSet.add(tagsBox.getAt(i));
     }
     List<dynamic> keys = methodsbox.keys.toList();
     for(dynamic key in keys) {
@@ -184,7 +184,8 @@ class _RecordFormState extends State<RecordForm> {
               ),
               suggestionsCallback: (pattern) async {
                 List<String> sorted = [];
-                for(String item in _tagList) {
+                List<String> tagsList = _tagsSet.toList();
+                for(String item in tagsList) {
                   if(item.contains(pattern)) {
                     sorted.add(item);
                   }
@@ -208,8 +209,7 @@ class _RecordFormState extends State<RecordForm> {
               });},
               onSaved: (value) {
                 setState(() {
-                  _tagList.add(value);
-                  Hive.box('tags').add(value);
+                  _tagsSet.add(value);
                 });
               },
             ),
@@ -375,5 +375,21 @@ class _RecordFormState extends State<RecordForm> {
         ),
       ),) 
     );
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    List<String> tagsList = _tagsSet.toList();
+    List<String> allTags = [];
+    Box tagsBox = Hive.box('tags');
+    for(int i = 0; i < tagsBox.length; i++) {
+      allTags.add(tagsBox.getAt(i));
+    }
+    for(String str in tagsList) {
+      if(allTags.indexOf(str) == -1) {
+        tagsBox.add(str);
+      }
+    }
   }
 }
