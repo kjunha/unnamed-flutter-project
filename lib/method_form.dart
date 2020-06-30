@@ -95,8 +95,7 @@ class _MethodFormState extends State<MethodForm> {
         Hive.box('methods').put(toKey(_methodName), replace);
         Hive.box('methods').delete(toKey(widget.method.name));
       }
-      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('수정된 거래수단의 정보를 저장했습니다.'),));
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -263,10 +262,10 @@ class _MethodFormState extends State<MethodForm> {
                       ),
                       attribute: "method_color",
                       validators: [
-                        (value) { return value == null?'선택하지 않으실 경우 기본색은 회색으로 지정됩니다.':null;}
+                        (value) { return value == null?'표시할 색상을 선택해 주세요':null;}
                       ],
                       options: _randerColorOption(),
-                      //initialValue: widget.method.colorHex??0x333333,
+                      initialValue: _methodColor,
                       onChanged: (value) {
                         if(value != null) {
                           _methodColor = value;

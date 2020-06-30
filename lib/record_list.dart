@@ -120,7 +120,7 @@ class _RecordListState extends State<RecordList> {
           caption: '수정',
           color: Colors.black45,
           icon: Icons.mode_edit,
-          onTap: () {
+          onTap: () async {
             //Find Element Key
             var keys = box.keys.toList();
             var key;
@@ -131,7 +131,12 @@ class _RecordListState extends State<RecordList> {
               }
             }
             Record record = Hive.box('records').getAt(key);
-            Navigator.pushNamed(context, '/records/edit', arguments: RecordKeySet(record, key));
+            final result = await Navigator.pushNamed(context, '/records/edit', arguments: RecordKeySet(record, key));
+            if(result != null && result == true) {
+              Scaffold.of(context)
+                ..removeCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text('수입 및 지출내역이 변경되었습니다.')));
+            }
           },
         ),
         IconSlideAction(
@@ -167,6 +172,9 @@ class _RecordListState extends State<RecordList> {
                       Hive.box('methods').put(toKey(method.name), method);
                       Hive.box('records').delete(key);
                       Navigator.of(context).pop();
+                      _scaffoldKey.currentState
+                        ..removeCurrentSnackBar()
+                        ..showSnackBar(SnackBar(content: Text('삭제되었습니다.')));
                     },
                   )
                 ],

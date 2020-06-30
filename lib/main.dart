@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:finance_point/model/record.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,13 +22,7 @@ import './transfer_form.dart';
 
 //Sandbox Dependency
 
-main() async {
-  await Hive.initFlutter();
-  Hive.registerAdapter(RecordAdapter());
-  Hive.registerAdapter(MethodAdapter());
-  await Hive.openBox('records');
-  await Hive.openBox('methods');
-  await Hive.openBox('tags');
+main() {
   runApp(ExtraCreditApp());
 }
 //Sandbox
@@ -38,11 +34,40 @@ class ExtraCreditApp extends StatefulWidget {
 }
 
 class _ExtraCreditAppState extends State<ExtraCreditApp> {
+  final _initFuture = Init.initialize();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Extra Credit',
-      home: Overview(),
+      home: FutureBuilder(
+        future: _initFuture,
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.done) {
+            if(snapshot.hasError) {
+              print('snapshot error');
+              return Text('SNAPSHOT_ERROR!');
+            } else {
+              return Overview();
+            }
+          } else {
+            //Splash Screen
+            return Scaffold(
+              backgroundColor: Colors.blueAccent,
+              body: Center(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('엑스트라 크레딧', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),),
+                  Text('나의 모든 자산을 한눈에', style: TextStyle(color: Colors.white, fontSize: 16),),
+                  SizedBox(height: 150,),
+                  CircularProgressIndicator(backgroundColor: Colors.white,),
+                  SizedBox(height: 50,),
+                  Text('정보를 가져오는중 입니다.', style: TextStyle(color:Colors.white),)
+                ],
+              ),)
+            );
+          }
+        },
+      ),
       routes: {
         '/add': (context) => RecordForm(),
         //'/about': (context) => AboutApp(),
@@ -78,6 +103,32 @@ class _ExtraCreditAppState extends State<ExtraCreditApp> {
   }
 
 }
+
+class Init {
+  static Future initialize() async {
+    await _registerService();
+    await _loadSettings();
+    //DEBUG: await Future.delayed(Duration(seconds: 10));
+  }
+
+  static _registerService() async {
+      //print('DEBUG: Starting registering services.');
+      await Hive.initFlutter();
+      Hive.registerAdapter(RecordAdapter());
+      Hive.registerAdapter(MethodAdapter());
+      //print('DEBUG: finished registering services');
+  }
+
+  static _loadSettings() async {
+    //print('DEBUG: starting loading settings.');
+    await Hive.openBox('records');
+    await Hive.openBox('methods');
+    await Hive.openBox('tags');
+    //print('DEBUG: finished loading settings.');
+  }
+}
+
+
 
 class Overview extends StatefulWidget {
   @override

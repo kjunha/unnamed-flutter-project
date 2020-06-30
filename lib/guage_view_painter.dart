@@ -27,7 +27,7 @@ class GuageViewPainter extends CustomPainter{
       c.drawArc(arcPosition, 0.611, -0.726, true, danger);
       c.drawArc(arcInner, 0.611, -4.363, false, bgColor);
       c.drawCircle(os, 4, black);
-      Offset base = getOnArc(-3.752, 0.036*percent, 80, os);
+      Offset base = getOnArc(-3.752, 0.036*(percent>120?120:percent), 80, os);
       c.drawLine(os, base, black);
       for(int i = 0; i < 13; i++) {
         Offset p1 = getOnArc(-3.752, 0.363*i, 95, os);

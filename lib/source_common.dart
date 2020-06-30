@@ -10,8 +10,8 @@ import 'package:intl/intl.dart';
 
 final nf = NumberFormat("#,###.##");
 final df = DateFormat('yyyy/MM/dd');
-final _unit = ' 원';
-final _point = ' P';
+final _unit = '원';
+final _point = 'P';
 
 String buildCurrencyString(double value, bool isPoint) {
   return nf.format(value) + " " + (isPoint?_point:_unit);
@@ -29,24 +29,21 @@ String toKey(String str) {
 
 //Build Tag UI for records
 Widget tagUIProvider(String str, Color col, bool isIncome) {
-  String text = str;
   Color textCol;
   bool isfill = true;
-  if(str == null || str.length == 0) {
+  if(str == '수입' || str == '지출') {
     isfill = false;
     if(isIncome) {
-      text = '수입';
       textCol = Colors.green;
     } else {
-      text = '지출';
       textCol = Colors.black;
     }
-  } else if(text == '내부송금') {
+  } else if(str == '내부송금') {
     isfill = false;
     textCol = Colors.orange;
   }
   return Container(
-    child: Center(child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textCol??Colors.white, letterSpacing: 1),)),
+    child: Center(child: Text(str, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textCol??Colors.white, letterSpacing: 1),)),
     width: 48,
     height: 22,
     decoration: BoxDecoration(border: Border.all(color:col, width:1), borderRadius: BorderRadius.circular(12), color: isfill?col:null),

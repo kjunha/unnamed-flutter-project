@@ -122,20 +122,17 @@ class _RecordFormState extends State<RecordForm> {
       Method newMethod = Hive.box('methods').get(toKey(_txMethod));
       Method origMethod = Hive.box('methods').get(toKey(origRecord.method.name));
       if(_segctrSelection == 1) {
-        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, newMethod, ''));
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount, newMethod, '수입'));
         newMethod.incSubtotal += (_amount - origRecord.amount);
       } else {
-        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, newMethod, _txTag??''));
+        Hive.box('records').putAt(_boxKey, Record(_dateInput, _txDescription, _amount*_segctrSelection, newMethod, _txTag??'지출'));
         newMethod.expSubTotal += (_amount - origRecord.amount);
       }
       origMethod.recordKeys.remove(_boxKey);
       newMethod.recordKeys.add(_boxKey);
       Hive.box('methods').put(toKey(origMethod.name), origMethod);
       Hive.box('methods').put(toKey(_txMethod),newMethod);
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(content: Text('수입 및 지출내역이 변경되었습니다.'),)
-      );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -241,31 +238,29 @@ class _RecordFormState extends State<RecordForm> {
             if(widget.mode == FormMode.ADD) {
               Navigator.of(context).pop();
             } else {
-              if(widget.record.description != _txDescription || widget.record.amount != _amount) {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text('아니오'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        FlatButton(
-                          child: Text('네'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    );
-                  }
-                );
-              }
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text('변경사항을 저장하지 않고 나가시겠습니까?'),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('아니오'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('네'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
+                  );
+                }
+              );
             }
           },
         ),
@@ -334,7 +329,7 @@ class _RecordFormState extends State<RecordForm> {
                       (value) {return double.tryParse(value) == null ? "숫자값을 입력해 주세요":null;}
                     ],
                     maxLines: 1,
-                    initialValue: widget.mode == FormMode.ADD?null:nf.format(_amount),
+                    initialValue: widget.mode == FormMode.ADD?null:_amount.abs().toString(),
                     controller: widget.mode == FormMode.ADD?_txAmountController:null,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(

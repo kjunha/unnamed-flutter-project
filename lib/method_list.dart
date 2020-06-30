@@ -13,6 +13,7 @@ class MethodList extends StatefulWidget {
 
 class _MethodListState extends State<MethodList> {
   //final fields
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Map<int, Widget> _children = {
     0:Text('전체'),
     1:Text('신용카드'),
@@ -66,8 +67,13 @@ class _MethodListState extends State<MethodList> {
               child: RaisedButton(
                 child: Text('수정', style: TextStyle(color: Colors.white),),
                 color: Colors.grey,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/methods/edit', arguments: currentMethod);
+                onPressed: () async {
+                  final result = await Navigator.pushNamed(context, '/methods/edit', arguments: currentMethod);
+                  if(result != null && result == true) {
+                    _scaffoldKey.currentState
+                      ..removeCurrentSnackBar()
+                      ..showSnackBar(SnackBar(content: Text('수정된 거래수단의 정보를 저장했습니다.'),));
+                  }
                 },
               ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -98,6 +104,9 @@ class _MethodListState extends State<MethodList> {
                             }
                             Hive.box('methods').delete(toKey(currentMethod.name));
                             Navigator.of(context).pop();
+                            _scaffoldKey.currentState
+                              ..removeCurrentSnackBar()
+                              ..showSnackBar(SnackBar(content: Text('삭제되었습니다.'),));
                           },
                         )
                       ],
@@ -117,6 +126,7 @@ class _MethodListState extends State<MethodList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
         title: Text('거래수단 관리'), 
