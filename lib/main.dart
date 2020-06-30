@@ -85,8 +85,12 @@ class Overview extends StatefulWidget {
 
 }
 
-class _OverviewState extends State<Overview> {
+class _OverviewState extends State<Overview> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Animation<double>animation;
+  AnimationController aniController;
+
   List<Record> _readRecordData(Box box) {
     List<Record> recordList = [];
     for(int i = 0; i < box.length; i++) {
@@ -172,7 +176,7 @@ class _OverviewState extends State<Overview> {
       backgroundColor: Colors.grey[300],
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Overview'),
+        title: Text('Extra Credit'),
         centerTitle: true,
       ),
       bottomNavigationBar: loadBottomNavigator(context),
@@ -183,46 +187,11 @@ class _OverviewState extends State<Overview> {
           children: [
             //데이터 시각화 카드
             Card(
-              child: Container(
-                color: Colors.grey[300],
-                margin: EdgeInsets.all(10),
-                child: CustomPaint(
-                  size: Size(360,240),
-                  painter: GuageViewPainter(),
-                ),
-              ),
-              //Structure: ValueListenableBuilder > Expansion Tile > Canvas
-            ),
-            //거래수단 목록 카드
-            Card(
-              child: ValueListenableBuilder(
-                valueListenable: Hive.box('methods').listenable(),
-                builder: (context, box, _) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if(Hive.box('methods').isEmpty) {
-                      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('먼저 거래수단을 추가해 주세요.'),));
-                    }
-                  });
-                  return ExpansionTile(
-                    title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
-                    initiallyExpanded: true,
-                    children: _buildPointWallet(context),
-                  );
-                },
-              ), 
-            ),
-            //수입 및 지출내역 카드
-            Card(
-              child: Column(children: [
-                ListTile(  
-                  title: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),),
-                  dense: false,
-                  trailing: IconButton(icon: Icon(Icons.add), onPressed: () {Navigator.pushNamed(context, '/add');},),
-                ),
-                Divider(thickness: 2, color: Colors.black,),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
-                  child: ValueListenableBuilder(
+              child: ExpansionTile(
+                title: Text('가계부 요약', style: TextStyle(fontWeight: FontWeight.bold),),
+                initiallyExpanded: true,
+                children: <Widget>[
+                  ValueListenableBuilder(
                     valueListenable: Hive.box('records').listenable(),
                     builder: (context, box, _) {
                       List<dynamic> recordKeys = box.keys.toList();
@@ -249,39 +218,82 @@ class _OverviewState extends State<Overview> {
                         _previous = rcd.amount*-1;
                       }
                       double _total = _incSubtotal - _expSubtotal;
-                      return Table(
-                        children: [
-                          TableRow(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                                  Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
-                                ],
-                              ),
-                            ]
-                          )
+                      double _percentage = _incSubtotal == 0?0:_expSubtotal/_incSubtotal*100;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.all(10),
+                            child: CustomPaint(
+                              size: Size(364,200),
+                              painter: GuageViewPainter(_percentage),
+                            ),
+                          ),
+                          Divider(thickness: 2, color: Colors.grey,),
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
+                            child: Table(
+                              children: [
+                                TableRow(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text('수입', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                        Text(buildCurrencyString(_incSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text('지출', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                        Text(buildCurrencyString(_expSubtotal, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text('누계', style:TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                                        Text(buildCurrencyString(_total, false), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                                      ],
+                                    ),
+                                  ]
+                                )
+                              ],
+                            ),
+                          ),
                         ],
                       );
-                    },
+                    }
                   ),
-                ),
-              ]),
+                ],
+              ),
+            ),
+            //거래수단 목록 카드
+            Card(
+              child: ValueListenableBuilder(
+                valueListenable: Hive.box('methods').listenable(),
+                builder: (context, box, _) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if(Hive.box('methods').isEmpty) {
+                      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('먼저 거래수단을 추가해 주세요.'),));
+                    }
+                  });
+                  return ExpansionTile(
+                    title: Text('거래수단 목록', style: TextStyle(fontWeight: FontWeight.bold), ),
+                    initiallyExpanded: true,
+                    children: _buildPointWallet(context),
+                  );
+                },
+              ), 
+            ),
+            //수입 및 지출내역 카드
+            Card(
+              child: ListTile(  
+                title: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),),
+                dense: false,
+                trailing: FlatButton(child: Text('추가하기', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),), onPressed: () {Navigator.pushNamed(context, '/add');},),
+              ),
             ),
             ValueListenableBuilder(
               valueListenable: Hive.box('records').listenable(),
