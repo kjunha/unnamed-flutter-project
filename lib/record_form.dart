@@ -89,11 +89,11 @@ class _RecordFormState extends State<RecordForm> {
       Box recordBox = Hive.box('records');
       Record newRecord;
       if(_segctrSelection == 1) {
-        newRecord = Record(_dateInput, _txDescription, _amount, method, '');
+        newRecord = Record(_dateInput, _txDescription, _amount, method,'수입');
         recordBox.add(newRecord);
         method.incSubtotal += _amount;
       } else {
-        newRecord = Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??'');
+        newRecord = Record(_dateInput, _txDescription, _amount*_segctrSelection, method, _txTag??'지출');
         recordBox.add(newRecord);
         method.expSubTotal += _amount;
       }
