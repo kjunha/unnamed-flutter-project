@@ -224,11 +224,19 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Colors.grey[200],
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Extra Credit'),
+        title: Text('Extra Credit', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+        elevation: 0.0,
         centerTitle: true,
+        backgroundColor: Colors.white,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.edit, color: Colors.black,),
+            onPressed: () {},
+          )
+        ],
       ),
       bottomNavigationBar: loadBottomNavigator(context),
       body: SingleChildScrollView(
@@ -237,7 +245,8 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             //데이터 시각화 카드
-            Card(
+            Container(
+              color: Colors.white,
               child: ExpansionTile(
                 title: Text('가계부 요약', style: TextStyle(fontWeight: FontWeight.bold),),
                 initiallyExpanded: true,
@@ -280,7 +289,7 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
                               painter: GuageViewPainter(_percentage),
                             ),
                           ),
-                          Divider(thickness: 2, color: Colors.grey,),
+                          Divider(thickness: 2, color: Colors.grey, indent: 10, endIndent: 10,),
                           Container(
                             margin: EdgeInsets.symmetric(vertical: 15,horizontal: 30),
                             child: Table(
@@ -320,8 +329,10 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
                 ],
               ),
             ),
+            SizedBox(height: 5,),
             //거래수단 목록 카드
-            Card(
+            Container(
+              color: Colors.white,
               child: ValueListenableBuilder(
                 valueListenable: Hive.box('methods').listenable(),
                 builder: (context, box, _) {
@@ -338,32 +349,34 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
                 },
               ), 
             ),
+            SizedBox(height: 5,),
             //수입 및 지출내역 카드
-            Card(
-              child: ListTile(  
-                title: Text('수입 및 지출 내역', style: TextStyle(fontWeight: FontWeight.bold),),
-                dense: false,
-                trailing: FlatButton(child: Text('추가하기', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),), onPressed: () {Navigator.pushNamed(context, '/add');},),
+            Container(
+              color: Colors.white,
+              child: ExpansionTile(
+                title: Text("수입 및 지출내역"),
+                initiallyExpanded: true,
+                children: <Widget>[
+                  ValueListenableBuilder(
+                    valueListenable: Hive.box('records').listenable(),
+                    builder: (context, box, _) {
+                      if(box.values.isEmpty) return Center(child: Text('수입 및 지출기록이 없습니다.'));
+                      return GroupedListView(
+                        elements: _readRecordData(box),
+                        groupBy: (element) {
+                          final record = element as Record;
+                          return df.format(record.date);
+                        },
+                        groupSeparatorBuilder: buildGroupSeparator,
+                        itemBuilder: _buildRecordList,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ),
-            ValueListenableBuilder(
-              valueListenable: Hive.box('records').listenable(),
-              builder: (context, box, _) {
-                if(box.values.isEmpty) return Center(child: Text('수입 및 지출기록이 없습니다.'));
-                return Flexible(child: GroupedListView(
-                  elements: _readRecordData(box),
-                  groupBy: (element) {
-                    final record = element as Record;
-                    return df.format(record.date);
-                  },
-                  groupSeparatorBuilder: buildGroupSeparator,
-                  itemBuilder: _buildRecordList,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                ),);
-              },
-
-            )
+            ),         
           ],
         ),
       )
