@@ -207,7 +207,7 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
     //UI Colors
     var positiveTextColor = Colors.green;
     var negativeTextColor = Colors.red;
-    return Card(
+    return Container(
       child: ListTile(
         title:Text(record.description,),
         subtitle: Text(record.method.name),
@@ -217,7 +217,16 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
           style: TextStyle(
             color: record.amount>0?positiveTextColor:negativeTextColor, 
             fontWeight: FontWeight.bold, fontSize: 18
-          ),),
+          ),
+        ),
+      ),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey,
+            width: 1.5
+          ) 
+        )
       ),
     );
   }
