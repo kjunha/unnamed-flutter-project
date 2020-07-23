@@ -34,8 +34,8 @@ class _MethodListState extends State<MethodList> {
   Widget _buildPointWallet(BuildContext context, int i, List<Method> filtered) {
     Method currentMethod = filtered[i];
 
-    return Card(child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
-      Container(width:280, child: Card(
+    return Card(margin: EdgeInsets.fromLTRB(20, 5, 20, 10), child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
+      Container(width:255, child: Card(
         color: Color(currentMethod.colorHex),
         margin: EdgeInsets.symmetric(vertical: 10,horizontal:10),
         child: Column(
@@ -129,8 +129,9 @@ class _MethodListState extends State<MethodList> {
       key: _scaffoldKey,
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
-        title: Text('거래수단 관리'), 
-        backgroundColor: Colors.blue,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text('거래수단 관리', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),), 
+        backgroundColor: Colors.white,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),
@@ -141,70 +142,74 @@ class _MethodListState extends State<MethodList> {
         ],
       ),
       bottomNavigationBar: loadBottomNavigator(context),
-      body: Column(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(5),
-            color: Colors.white,
-            child:Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                SizedBox(height: 5,),
-                Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
-                  width: double.infinity,
-                  child: MaterialSegmentedControl(
-                    children: _children,
-                    selectionIndex: _segctrSelection,
-                    selectedColor: Colors.blueAccent,
-                    unselectedColor: Colors.white,
-                    borderRadius: 25.0,
-                    onSegmentChosen: (index) {
-                      setState(() {
-                        _segctrSelection = index;
-                      });
-                    },
+      body: Container(
+        constraints: BoxConstraints.expand(),
+        decoration: BoxDecoration(color: Colors.white, gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.centerLeft, colors: [Color(0xff5b99fc), Color(0xffb991fc)])),
+        child: Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(5),
+              color: Colors.white,
+              child:Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  SizedBox(height: 5,),
+                  Row(children: <Widget>[SizedBox(width: 10,),Text('거래수단 종류별 정렬', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),],),
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical:10, horizontal:0),
+                    width: double.infinity,
+                    child: MaterialSegmentedControl(
+                      children: _children,
+                      selectionIndex: _segctrSelection,
+                      selectedColor: Colors.blueAccent,
+                      unselectedColor: Colors.white,
+                      borderRadius: 25.0,
+                      onSegmentChosen: (index) {
+                        setState(() {
+                          _segctrSelection = index;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          
-          ValueListenableBuilder(
-            valueListenable: Hive.box('methods').listenable(),
-            builder: (context, box,  _) {
-              if(box.values.isEmpty) {
-                return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
-              }
-              List<Method> filtered = [];
-              List keys = box.keys.toList();
-              for(dynamic key in keys) {
-                switch(_segctrSelection) {
-                  case 1:
-                    if(box.get(key).type == "credit") filtered.add(box.get(key));
-                    break;
-                  case 2:
-                    if(box.get(key).type == "debit") filtered.add(box.get(key));
-                    break;
-                  case 3:
-                    if(box.get(key).type == "cash") filtered.add(box.get(key));
-                    break;
-                  case 4:
-                    if(box.get(key).type == "point") filtered.add(box.get(key));
-                    break;
-                  default:
-                    filtered.add(box.get(key));
-                    break;
+            
+            ValueListenableBuilder(
+              valueListenable: Hive.box('methods').listenable(),
+              builder: (context, box,  _) {
+                if(box.values.isEmpty) {
+                  return Center(child: Text('여기에 보유한 거래수단이 보여집니다.'),);
                 }
+                List<Method> filtered = [];
+                List keys = box.keys.toList();
+                for(dynamic key in keys) {
+                  switch(_segctrSelection) {
+                    case 1:
+                      if(box.get(key).type == "credit") filtered.add(box.get(key));
+                      break;
+                    case 2:
+                      if(box.get(key).type == "debit") filtered.add(box.get(key));
+                      break;
+                    case 3:
+                      if(box.get(key).type == "cash") filtered.add(box.get(key));
+                      break;
+                    case 4:
+                      if(box.get(key).type == "point") filtered.add(box.get(key));
+                      break;
+                    default:
+                      filtered.add(box.get(key));
+                      break;
+                  }
+                }
+                return Flexible(child: ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, i) =>_buildPointWallet(context, i, filtered),
+                ),);
               }
-              return Flexible(child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, i) =>_buildPointWallet(context, i, filtered),
-              ),);
-            }
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

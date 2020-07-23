@@ -21,27 +21,19 @@ class _MyAppState extends State<MyApp> {
           elevation: 0.0,
           actions: <Widget>[IconButton(icon: Icon(Icons.edit, color: Colors.black,),onPressed: () {print("appbar button");},)],
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Container(
-                  height: 100,
-                  color: Colors.white,
-                  child: Center(child: Text("first container")),
-                ),
-                SizedBox(height: 10,),
-                Container(
-                  height: 100,
-                  color: Colors.white,
-                  child: Center(child: Text("second container")),
-                ),
-              ],
-            ),
-          )
+        body: Container(
+          constraints:BoxConstraints.expand(),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors:[Colors.red, Colors.green, Colors.yellow, Colors.white, Colors.white]
+            )
+          ),
+          child: Card(
+            child: Center(child: Text("Design Preview"),),
+            margin: EdgeInsets.all(30),
+          ),
         )
 
       ),

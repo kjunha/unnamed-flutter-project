@@ -237,7 +237,6 @@ class _OverviewState extends State<Overview> with TickerProviderStateMixin {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Extra Credit', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
-        elevation: 0.0,
         centerTitle: true,
         backgroundColor: Colors.white,
         actions: <Widget>[

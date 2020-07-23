@@ -75,14 +75,20 @@ int findRecordKey(Record record) {
 
 //Group List Group bar
 Widget buildGroupSeparator(dynamic groupByValue) {
-  return Row(
-    children: <Widget>[
-      SizedBox(width: 20),
-      Text(groupByValue, style: TextStyle(fontSize: 16),),
-      SizedBox(width: 12),
-      Expanded(child: Divider(color: Colors.black,),),
-      SizedBox(width: 20),
-    ],
+  return Container(
+    padding: EdgeInsets.symmetric(vertical:10),
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: Colors.grey, width: 1.5))
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        SizedBox(width: 20),
+        Icon(Icons.calendar_today, color: Colors.grey[600],),
+        SizedBox(width: 5,),
+        Text(groupByValue, style: TextStyle(fontSize: 18, color: Colors.grey[600]),),
+      ],
+    ),
   );
 }
 
